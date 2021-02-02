@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "575563050356",
+    "project_id": "cyberwaves-576ec",
+    "storage_bucket": "cyberwaves-576ec.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575563050356:android:866c27341b00749c37d021",
+        "android_client_info": {
+          "package_name": "com.heyhuo.cyber_waves"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "575563050356-9hhrm1o2ishdlftgnodkult1p1sdtosh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuQLQ2DCG3M42r-DttWAjXUEKi9_nnA48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "575563050356-9hhrm1o2ishdlftgnodkult1p1sdtosh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
