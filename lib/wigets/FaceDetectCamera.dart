@@ -10,7 +10,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screen_recording/flutter_screen_recording.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:quiver/async.dart';
 
 class FaceCameraMain extends StatefulWidget {
   const FaceCameraMain(
@@ -38,13 +42,14 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
   CustomPainter painter;
   bool cameraEnabled = true;
   bool _isDetecting = true;
+  bool _ctrlBtnVisible = true;
   var cmIdx = 0; //0 后置
   var quality = ResolutionPreset.low;
+  var _imagePath;
   FaceDetector detector;
-
+  List<String> stickerList = List<String>();
 
   GlobalKey animateWidgetKey = GlobalKey();
-
 
   double rpx;
   bool _stickerVisible = false;
@@ -54,6 +59,15 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
   IconData _cameraIcon = Icons.camera_rear_outlined;
   Color _faceDetectColor = Colors.white;
   Color _cameraColor = Colors.white;
+  int _time = 0;
+
+  requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.photos,
+      Permission.storage,
+      Permission.microphone,
+    ].request();
+  }
 
   @override
   void initState() {
@@ -61,177 +75,13 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     size = widget.size;
     rpx = widget.rpx;
     provider = widget.provider;
-    // FirebaseApp.
-    // FirebaseApp.initializeApp();
+
+    requestPermissions();
+    startTimer();
+
+    stickerList = ["haru", "rize", "sakura", "haru", "rize", "sakura"];
+
     _initializeCamera();
-  }
-
-  /* 检测人脸 */
-  Future<void> _detectFace() async {
-    if (!_isDetecting) {
-      faces = null;
-      if(detector!=null)
-        detector.close();
-    } else {
-      _camera.startImageStream((CameraImage image) async {
-        if (!isProcess && mounted && _isDetecting) {
-          isProcess = false;
-          // 创建检测器
-          detector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
-              enableContours: true, mode: FaceDetectorMode.fast));
-          final visionImage = FirebaseVisionImage.fromBytes(
-              concatenatePlanes(image.planes),
-              buildMetaData(image, ImageRotation.rotation90));
-
-          // detector._isClosed=false;
-
-          detector.processImage(visionImage).then((value) {
-            setState(() {
-              faces = value;
-            });
-          });
-        }
-      });
-    }
-  }
-
-  _getWaifu(imgName) {
-    return Container(
-      margin: EdgeInsets.only(left: 12 * rpx, top: 10 * rpx),
-      padding: EdgeInsets.only(top: 10),
-      width: 355 * rpx,
-      height: 320 * rpx,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        //color: Theme.of(context).primaryColor.withOpacity(0.6),
-      ),
-      child: Image.asset("assets/waifus/${imgName}"),
-    );
-  }
-
-  /* 切换前后置摄像头 */
-  Future<void> _onCameraSwitch() async {
-    CameraDescription cameraDescription;
-    if (_camera.description == cameras[0]) {
-      cameraDescription = cameras[1];
-      _cameraIcon = Icons.camera_front_outlined;
-    } else {
-      cameraDescription = cameras[0];
-      _cameraIcon = Icons.camera_rear_outlined;
-    }
-
-    if (_camera != null) {
-      await _camera.dispose();
-    }
-    _camera = CameraController(cameraDescription, ResolutionPreset.medium);
-    _camera.addListener(() {
-      if (mounted) setState(() {});
-      if (_camera.value.hasError) {
-        showInSnackBar('Camera error ${_camera.value.errorDescription}');
-      }
-    });
-
-    try {
-      await _camera.initialize();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<void> _initializeCamera() async {
-    cameras = await availableCameras();
-
-    _camera = CameraController(cameras[cmIdx], quality);
-    _camera.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _camera?.dispose();
-    super.dispose();
-  }
-
-  /* 相机配置按钮组件 */
-  Widget _getCameraIcon(IconData iconData, txt, Color color) {
-    Widget btn = Column(
-      children: [
-        Container(
-          width: 100 * rpx,
-          height: 50 * rpx,
-          child: Icon(iconData, color: color),
-        ),
-        Text(txt, style: TextStyle(fontSize: 8, color: color)),
-      ],
-    );
-    return btn;
-  }
-
-  /* 底部相机控制按钮 */
-  Widget _getCameraCtrlBtn(icon, size, height) {
-    return Container(
-      width: 140 * rpx,
-      height: height * rpx,
-      child: Icon(icon, size: size, color: Colors.white),
-    );
-  }
-
-  FirebaseVisionImageMetadata buildMetaData(
-      CameraImage image, ImageRotation rotation) {
-    return FirebaseVisionImageMetadata(
-      size: Size(image.width.toDouble(), image.height.toDouble()),
-      rawFormat: image.format.raw,
-      rotation: rotation,
-      planeData: image.planes.map(
-        (Plane plane) {
-          return FirebaseVisionImagePlaneMetadata(
-              bytesPerRow: plane.bytesPerRow,
-              height: plane.height,
-              width: plane.width);
-        },
-      ).toList(),
-    );
-  }
-
-  concatenatePlanes(List<Plane> planes) {
-    WriteBuffer buffers = WriteBuffer();
-    planes.forEach((plane) {
-      buffers.putUint8List(plane.bytes);
-    });
-    return buffers.done().buffer.asUint8List();
-  }
-
-  Widget _facePainterBox() {
-    return SafeArea(
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.fitWidth,
-          child: SizedBox(
-            width: size.width,
-            height: size.height, //* _camera.value.aspectRatio,
-            child: (faces != null)
-                ? CustomPaint(
-                    painter: FacePainter(faces, _camera.value.previewSize, size,
-                        cmIdx), //_controller.value.previewSize
-                    //RainbowPainter(faces, _controller.value.previewSize, size),
-                    //painter,
-                  )
-                : Center(
-                    child: Container(
-                    color: Colors.black.withOpacity(0.2),
-                  )),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -248,8 +98,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
         WaifuAnimate(
           faces: faces,
           rpx: rpx,
-          imagePath: "assets/poser_img/sakura-0-0-0.png",
-          // key: animateWidgetKey,
+          imagePath: _imagePath,
         ),
         /*贴纸列表*/
         Container(
@@ -299,59 +148,63 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                           ),
 
                     /*相机功能按钮组件*/
-                    Positioned(
-                      top: 30 * rpx,
-                      right: 10 * rpx,
-                      // height: 350 * rpx,
-                      child: Container(
-                        width: 80 * rpx,
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            InkWell(
+                    Visibility(
+                      visible: _ctrlBtnVisible,
+                      child: Positioned(
+                        top: 30 * rpx,
+                        right: 10 * rpx,
+                        // height: 350 * rpx,
+                        child: Container(
+                          width: 80 * rpx,
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: Colors.grey.withOpacity(0.3),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              InkWell(
+                                  onTap: () {
+                                    // 相机切换
+                                    _onCameraSwitch();
+                                  },
+                                  child: _getCameraIcon(
+                                      _cameraIcon, "翻转", Colors.white)),
+                              _getCameraIcon(
+                                  Icons.aspect_ratio, "画幅", Colors.white),
+                              InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      cameraEnabled = !cameraEnabled;
+                                    });
+                                  },
+                                  child: _getCameraIcon(
+                                      Icons.camera_enhance_outlined,
+                                      "相机",
+                                      Colors.white)),
+                              _getCameraIcon(Icons.camera, "画质", Colors.white),
+                              InkWell(
                                 onTap: () {
-                                  // 相机切换
-                                  _onCameraSwitch();
-                                },
-                                child: _getCameraIcon(
-                                    _cameraIcon, "翻转", Colors.white)),
-                            _getCameraIcon(
-                                Icons.aspect_ratio, "画幅", Colors.white),
-                            InkWell(
-                                onTap: () {
+                                  _detectFace();
                                   setState(() {
-                                    cameraEnabled = !cameraEnabled;
+                                    _isDetecting = !_isDetecting;
+                                    if (_isDetecting) {
+                                      _faceDetectIcon =
+                                          Icons.face_retouching_natural;
+                                      _faceDetectColor = Colors.white;
+                                    } else {
+                                      _faceDetectIcon =
+                                          Icons.face_unlock_rounded;
+                                      _faceDetectColor = Colors.white38;
+                                    }
                                   });
                                 },
                                 child: _getCameraIcon(
-                                    Icons.camera_enhance_outlined,
-                                    "相机",
-                                    Colors.white)),
-                            _getCameraIcon(Icons.camera, "画质", Colors.white),
-                            InkWell(
-                              onTap: () {
-                                _detectFace();
-                                setState(() {
-                                  _isDetecting = !_isDetecting;
-                                  if (_isDetecting) {
-                                    _faceDetectIcon =
-                                        Icons.face_retouching_natural;
-                                    _faceDetectColor = Colors.white;
-                                  } else {
-                                    _faceDetectIcon = Icons.face_unlock_rounded;
-                                    _faceDetectColor = Colors.white38;
-                                  }
-                                });
-                              },
-                              child: _getCameraIcon(
-                                  _faceDetectIcon, "面捕", _faceDetectColor),
-                            )
-                          ],
+                                    _faceDetectIcon, "面捕", _faceDetectColor),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -383,21 +236,36 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                             });
                           },
                           child: _getCameraCtrlBtn(
-                              Icons.emoji_emotions_outlined, 35.0, 40)),
+                              Icons.emoji_emotions_outlined,
+                              Colors.white,
+                              35.0,
+                              120,
+                              120)),
+                      /*开始录屏幕*/
                       InkWell(
                           onTap: () {
-                            if (_isRecording) {
-                              stopVideoRecording();
-                            } else {
-                              startVideoRecording();
+                            if (_imagePath!=null) {
+                              if (_isRecording) {
+                                // 停止录屏
+                                stopScreenRecord();
+                              } else {
+                                // 开始录屏
+                                startScreenRecord(false);
+                              }
                             }
                           },
                           child: _getCameraCtrlBtn(
-                              Icons.play_circle_fill_sharp, 80.0, 110)),
+                              _isRecording
+                                  ? Icons.pause_circle_outline
+                                  : Icons.play_circle_outline,
+                              _imagePath == null ? Colors.grey : Colors.white,
+                              80.0,
+                              160,
+                              160)),
                       InkWell(
                           onTap: () {},
-                          child: _getCameraCtrlBtn(
-                              Icons.photo_outlined, 35.0, 40)),
+                          child: _getCameraCtrlBtn(Icons.photo_outlined,
+                              Colors.white, 35.0, 120, 120)),
                     ],
                   ),
                 ),
@@ -445,35 +313,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             child: Container(
-                              child: Column(
-                                children: [
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                  Row(children: [
-                                    _getWaifu("sakura.png"),
-                                    _getWaifu("haru.png")
-                                  ]),
-                                ],
-                              ),
-                            ),
+                                child: _getStickerList(stickerList, 4)),
                           ),
                         ),
                       ],
@@ -487,6 +327,134 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
       ],
     );
   }
+
+  void startTimer() {
+    CountdownTimer countdownTimer = new CountdownTimer(
+        new Duration(seconds: 1000), new Duration(seconds: 1));
+
+    var sub = countdownTimer.listen(null);
+    sub.onData((data) {
+      setState(() => _time++);
+    });
+
+    sub.onDone(() {
+      print("ScreenRecord Done.");
+      sub.cancel();
+    });
+  }
+
+  /* 检测人脸 */
+  Future<void> _detectFace() async {
+    if (!_isDetecting) {
+      faces = null;
+      if (detector != null) detector.close();
+    } else {
+      _camera.startImageStream((CameraImage image) async {
+        if (!isProcess && mounted && _isDetecting) {
+          isProcess = false;
+          // 创建检测器
+          detector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+              enableContours: true, mode: FaceDetectorMode.fast));
+          final visionImage = FirebaseVisionImage.fromBytes(
+              concatenatePlanes(image.planes),
+              buildMetaData(image, ImageRotation.rotation90));
+
+          // detector._isClosed=false;
+
+          detector.processImage(visionImage).then((value) {
+            setState(() {
+              faces = value;
+            });
+          });
+        }
+      });
+    }
+  }
+
+  /* 切换前后置摄像头 */
+  Future<void> _onCameraSwitch() async {
+    CameraDescription cameraDescription;
+    if (_camera.description == cameras[0]) {
+      cameraDescription = cameras[1];
+      _cameraIcon = Icons.camera_front_outlined;
+    } else {
+      cameraDescription = cameras[0];
+      _cameraIcon = Icons.camera_rear_outlined;
+    }
+
+    if (_camera != null) {
+      await _camera.dispose();
+    }
+    _camera = CameraController(cameraDescription, ResolutionPreset.medium);
+    _camera.addListener(() {
+      if (mounted) setState(() {});
+      if (_camera.value.hasError) {
+        showInSnackBar('Camera error ${_camera.value.errorDescription}');
+      }
+    });
+
+    try {
+      await _camera.initialize();
+    } on CameraException catch (e) {
+      _showCameraException(e);
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  /* 初始化摄像头 */
+  Future<void> _initializeCamera() async {
+    cameras = await availableCameras();
+
+    _camera = CameraController(cameras[cmIdx], quality);
+    _camera.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    });
+  }
+
+  /* 开始录屏 */
+  Future<void> startScreenRecord(bool audio) async {
+    bool start = false;
+    // await Future.delayed(const Duration(milliseconds: 1000));
+    _timerKey.currentState.startTimer();
+
+    if (audio) {
+      start = await FlutterScreenRecording.startRecordScreenAndAudio(
+        "AnimateWithAudio_${_time.toString()})",
+      ); //titleNotification: "dsffad",messageNotification: "sdffd"
+    } else {
+      start = await FlutterScreenRecording.startRecordScreen(
+          "Animate_${_time.toString()}"); //,titleNotification: "dsffad",messageNotification: "sdffd"
+    }
+    if (start) {
+      setState(() {
+        _isRecording = !_isRecording;
+        _ctrlBtnVisible = false;
+      });
+    }
+    return start;
+  }
+
+  /* 停止录屏 */
+  stopScreenRecord() async {
+    String path = await FlutterScreenRecording.stopRecordScreen;
+    _timerKey.currentState.stopTimer();
+    setState(() {
+      _isRecording = !_isRecording;
+      _ctrlBtnVisible = true;
+    });
+    print("Opening video");
+    print(path);
+    OpenFile.open(path);
+  }
+
+  /* 获取当前时间戳 */
+  String _timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   /*开始录制视频
   * 检查相机控制器是否已初始化。
@@ -543,7 +511,127 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     }
   }
 
-  String _timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
+  @override
+  void dispose() {
+    _camera?.dispose();
+    super.dispose();
+  }
+
+  FirebaseVisionImageMetadata buildMetaData(
+      CameraImage image, ImageRotation rotation) {
+    return FirebaseVisionImageMetadata(
+      size: Size(image.width.toDouble(), image.height.toDouble()),
+      rawFormat: image.format.raw,
+      rotation: rotation,
+      planeData: image.planes.map(
+        (Plane plane) {
+          return FirebaseVisionImagePlaneMetadata(
+              bytesPerRow: plane.bytesPerRow,
+              height: plane.height,
+              width: plane.width);
+        },
+      ).toList(),
+    );
+  }
+
+  concatenatePlanes(List<Plane> planes) {
+    WriteBuffer buffers = WriteBuffer();
+    planes.forEach((plane) {
+      buffers.putUint8List(plane.bytes);
+    });
+    return buffers.done().buffer.asUint8List();
+  }
+
+  Widget _getSticker(imgName) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _imagePath = imgName;
+          _stickerVisible = false;
+        });
+      },
+      child: Container(
+        margin: EdgeInsets.only(left: 12 * rpx, top: 10 * rpx),
+        padding: EdgeInsets.only(top: 10),
+        width: 170 * rpx,
+        height: 200 * rpx,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          //color: Theme.of(context).primaryColor.withOpacity(0.6),
+        ),
+        child: Image.asset("assets/poser_img/${imgName}/${imgName}-0-0-0.png"),
+      ),
+    );
+  }
+
+  Widget _getStickerList(List<String> stickerList, int rowSize) {
+    List<Widget> rowColList = new List<Widget>();
+    int colSize = (stickerList.length / rowSize).ceil();
+    int idx = 0;
+    for (var i = 0; i < colSize; i++) {
+      int widgetSize = min(stickerList.length - idx, rowSize);
+      rowColList.add(Row(
+        children: List.generate(widgetSize, (index) {
+          return _getSticker(stickerList[idx++]);
+        }),
+      ));
+    }
+
+    return Column(children: rowColList);
+  }
+
+  /* 相机配置按钮组件 */
+  Widget _getCameraIcon(IconData iconData, txt, Color color) {
+    Widget btn = Column(
+      children: [
+        Container(
+          width: 100 * rpx,
+          height: 50 * rpx,
+          child: Icon(iconData, color: color),
+        ),
+        Text(txt, style: TextStyle(fontSize: 8, color: color)),
+      ],
+    );
+    return btn;
+  }
+
+  /* 底部相机控制按钮 */
+  Widget _getCameraCtrlBtn(icon, color, size, width, height) {
+    return Visibility(
+      // visible: _ctrlBtnVisible,
+      child: Container(
+        // color: Colors.yellow,
+        width: width * rpx,
+        height: height * rpx,
+        child: Icon(icon, size: size, color: color),
+      ),
+    );
+  }
+
+  /* 脸部绘制 */
+  Widget _facePainterBox() {
+    return SafeArea(
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: SizedBox(
+            width: size.width,
+            height: size.height, //* _camera.value.aspectRatio,
+            child: (faces != null)
+                ? CustomPaint(
+                    painter: FacePainter(
+                        faces, _camera.value.previewSize, size, cmIdx),
+                  )
+                : Center(
+                    child: Container(
+                        // color: Colors.black.withOpacity(0.2),
+                        ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _showCameraException(CameraException e) {
     logError(e.code, e.description);

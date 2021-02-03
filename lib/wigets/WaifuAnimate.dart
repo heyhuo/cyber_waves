@@ -15,7 +15,6 @@ import 'package:quiver/async.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
 class WaifuAnimate extends StatefulWidget {
   const WaifuAnimate({Key key, @required this.faces, this.rpx, this.imagePath})
       : super(key: key);
@@ -39,11 +38,11 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
   bool recording = false;
 
   requestPermissions() async {
-    await PermissionHandler().requestPermissions([
-      PermissionGroup.storage,
-      PermissionGroup.photos,
-      PermissionGroup.microphone,
-    ]);
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.photos,
+      Permission.storage,
+      Permission.microphone,
+    ].request();
   }
 
   @override
@@ -74,14 +73,8 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
 
   @override
   Widget build(BuildContext context) {
-    /*   if (faces == null) {
-      return Container(
-        width: 750 * rpx,
-        height: 600 * rpx,
-        color: Colors.black,
-      );
-    }*/
     faces = widget.faces;
+    imagePath = widget.imagePath;
 
     return Container(
       // padding: EdgeInsets.symmetric(vertical: 50*rpx,horizontal: 20*rpx),
@@ -121,11 +114,13 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
                   child: Container(
                     width: 200 * rpx * 2,
                     height: 200 * rpx * 2,
-                    child: ImagesAnimation(
-                        w: 100,
-                        h: 100,
-                        entry: ImagesAnimationEntry(
-                            0, 3, "assets/poser_img/sakura-%s-0-1.png")),
+                    child: imagePath == null
+                        ? Center(child: Container(child: Text("左下角选个形象吧~"),))
+                        : ImagesAnimation(
+                            w: 100,
+                            h: 100,
+                            entry: ImagesAnimationEntry(0, 4,
+                                "assets/poser_img/$imagePath/$imagePath-%s-0-1.png")),
 //"images/men_sport_%s.png" 表示图片在你本地的路径，%s会被下标代替,
 
                     // child: (faces == null || faces.length == 0)
@@ -137,94 +132,33 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
             ),
           ),
           //
-          Positioned(
-              top: 0,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Time: $_time\n'),
-                  !recording
-                      ? Center(
-                          child: RaisedButton(
-                            child: Text("Record Screen"),
-                            onPressed: () => startScreenRecord(false),
-                          ),
-                        )
-                      : Container(),
-                  !recording
-                      ? Center(
-                          child: RaisedButton(
-                            child: Text("Record Screen & audio"),
-                            onPressed: () => startScreenRecord(true),
-                          ),
-                        )
-                      : Center(
-                          child: RaisedButton(
-                            child: Text("Stop Record"),
-                            onPressed: () => stopScreenRecord(),
-                          ),
-                        )
-                ],
-              )),
           // 截图录屏按钮
-          Positioned(
-              bottom: 0,
-              right: 10,
-              child: CircleAvatar(
-                child: IconButton(
-                    icon: Icon(Icons.play_arrow),
-                    color: Colors.black,
-                    onPressed: () {
-                      _capturePng();
-                    }),
-              )),
-          Positioned(
-              bottom: 0,
-              left: 0,
-              child: Container(
-                // padding: EdgeInsets.symmetric(horizontal: 3),
-                height: 110,
-                width: 120,
-                color: Colors.black.withOpacity(0.5),
-                child:
-                    images.length > 0 ? Image.memory(images.last) : Text("das"),
-              )),
+          // Positioned(
+          //     bottom: 0,
+          //     right: 10,
+          //     child: CircleAvatar(
+          //       child: IconButton(
+          //           icon: Icon(Icons.play_arrow),
+          //           color: Colors.black,
+          //           onPressed: () {
+          //             _capturePng();
+          //           }),
+          //     )),
+          /*截图展示区域*/
+          // Positioned(
+          //     bottom: 0,
+          //     left: 0,
+          //     child: Container(
+          //       // padding: EdgeInsets.symmetric(horizontal: 3),
+          //       height: 110,
+          //       width: 120,
+          //       color: Colors.black.withOpacity(0.5),
+          //       child:
+          //           images.length > 0 ? Image.memory(images.last) : Text("das"),
+          //     )),
         ],
       ),
     );
-  }
-
-  /* 开始录屏 */
-  startScreenRecord(bool audio) async {
-    bool start = false;
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    if (audio) {
-      start = await FlutterScreenRecording.startRecordScreenAndAudio(
-          "AnimateWithAudio_${_time.toString()})",
-          titleNotification: "dsffad",
-          messageNotification: "sdffd");
-    } else {
-      start = await FlutterScreenRecording.startRecordScreen(
-          "Animate_${_time.toString()}",
-          titleNotification: "dsffad",
-          messageNotification: "sdffd");
-    }
-    if (start) {
-      setState(() => recording = !recording);
-    }
-    return start;
-  }
-
-  /* 停止录屏 */
-  stopScreenRecord() async {
-    String path = await FlutterScreenRecording.stopRecordScreen;
-    setState(() {
-      recording = !recording;
-    });
-    print("Opening video");
-    print(path);
-    OpenFile.open(path);
   }
 
   /* 获取截图 */
@@ -338,7 +272,7 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
     //     "left eye:${leftEyebrowBottom.first.dy - leftEyebrowTop.first.dy}");
 
     var imgName =
-        "assets/poser_img/sakura-0.${rightIdx}-0.${leftIdx}-0.${mouthIdx}.png";
+        "assets/poser_img/sakura/sakura-${rightIdx}-${leftIdx}-${mouthIdx}.png";
 
     return Image.asset(imgName);
   }

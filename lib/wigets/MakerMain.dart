@@ -69,19 +69,21 @@ class _MakerMainState extends State<MakerMain> {
         Container(
           margin: EdgeInsets.only(top: 30),
           height: 80 * rpx,
-          child: ListTile(
-            leading: Container(
-              width: 10 * rpx,
-            ),
-            trailing: IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  // Navigator.pop(context);
-                }),
-            title: Center(
-              child: Text("Waifu Animate"),
-            ),
-          ),
+          color: Colors.black,
+          // child:
+          // ListTile(
+          //   leading: Container(
+          //     width: 10 * rpx,
+          //   ),
+          //   trailing: IconButton(
+          //       icon: Icon(Icons.close),
+          //       onPressed: () {
+          //         // Navigator.pop(context);
+          //       }),
+          //   title: Center(
+          //     child: Text("Waifu Animate"),
+          //   ),
+          // ),
         ),
 
         /*相机界面*/

@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:cyber_waves/providers/CameraProvider.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:vibrate/vibrate.dart';
@@ -243,9 +243,9 @@ class _CameraMainState extends State<CameraMain> {
                                 onPressed: () async {
                                   provider.cameraController
                                       .stopVideoRecording();
-                                  await ImageGallerySaver.saveFile(
-                                      provider.fileName);
-                                  File(provider.fileName).delete();
+                                  // await ImageGallerySaver.saveFile(
+                                  //     provider.fileName);
+                                  // File(provider.fileName).delete();
                                 },
                               )
                             : IconWithText(
