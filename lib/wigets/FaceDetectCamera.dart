@@ -244,7 +244,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                       /*开始录屏幕*/
                       InkWell(
                           onTap: () {
-                            if (_imagePath!=null) {
+                            if (_imagePath != null) {
                               if (_isRecording) {
                                 // 停止录屏
                                 stopScreenRecord();
@@ -1023,7 +1023,6 @@ class FacePainter extends CustomPainter {
       /*List<Offset> fa=new List<Offset>();
       fa.add(facePoints[0]);
       fa.add(facePoints[18]);
-
       canvas.drawPoints(
           PointMode.polygon,
           _scalePoints(

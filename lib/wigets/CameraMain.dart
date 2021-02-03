@@ -76,13 +76,13 @@ class _CameraMainState extends State<CameraMain> {
             availableImage.width.toDouble(), availableImage.height.toDouble()),
         planeData: availableImage.planes
             .map((currentPlane) => FirebaseVisionImagePlaneMetadata(
-                bytesPerRow: currentPlane.bytesPerRow,
-                height: currentPlane.height,
-                width: currentPlane.width))
+            bytesPerRow: currentPlane.bytesPerRow,
+            height: currentPlane.height,
+            width: currentPlane.width))
             .toList(),
         rotation: ImageRotation.rotation90);
     final FirebaseVisionImage visionImage =
-        FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
+    FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
     final FaceDetector detector = FirebaseVision.instance.faceDetector();
     final List<Face> faces = await detector.processImage(visionImage);
 
@@ -131,155 +131,155 @@ class _CameraMainState extends State<CameraMain> {
 
     return _controller.value.isInitialized
         ? Stack(children: <Widget>[
-            // Camera.open(cameraId),
-            findFace
-                ? Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.red,
-                    ))
-                : Container(),
-            ClipRect(
-                child: Transform.scale(
-              scale: _controller.value.aspectRatio / size.aspectRatio,
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: CameraPreview(_controller),
-                ),
-              ),
-            )),
-            Positioned(
-              //顶部关闭按钮
-              top: toTop,
-              left: 30 * rpx,
-              child: IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 60 * rpx,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+      // Camera.open(cameraId),
+      findFace
+          ? Positioned(
+          top: 0,
+          left: 0,
+          child: Container(
+            width: 100,
+            height: 100,
+            color: Colors.red,
+          ))
+          : Container(),
+      ClipRect(
+          child: Transform.scale(
+            scale: _controller.value.aspectRatio / size.aspectRatio,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: CameraPreview(_controller),
               ),
             ),
-            Positioned(
-              //选择音乐
-              top: toTop,
-              left: 250 * rpx,
-              child: Container(
-                width: 250 * rpx,
-                child: FlatButton(
-                  onPressed: () {},
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.music_note,
+          )),
+      Positioned(
+        //顶部关闭按钮
+        top: toTop,
+        left: 30 * rpx,
+        child: IconButton(
+          icon: Icon(
+            Icons.close,
+            color: Colors.white,
+            size: 60 * rpx,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      Positioned(
+        //选择音乐
+        top: toTop,
+        left: 250 * rpx,
+        child: Container(
+          width: 250 * rpx,
+          child: FlatButton(
+            onPressed: () {},
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.music_note,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  width: 10 * rpx,
+                ),
+                Text(
+                  "选择音乐",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        //拍照按钮
+        bottom: 160 * rpx,
+        // left: (750*rpx-outBox)/2,
+        child: Container(
+            width: 750 * rpx,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  /* 底部贴纸弹窗 */
+                  ifMakeVideo
+                      ? Container(
+                    width: 80 * rpx,
+                  )
+                      : FlatButton(
+                    child: IconWithText(
+                      icon: Icon(
+                        Icons.emoji_emotions_outlined,
                         color: Colors.white,
                       ),
-                      SizedBox(
-                        width: 10 * rpx,
-                      ),
-                      Text(
-                        "选择音乐",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              //拍照按钮
-              bottom: 160 * rpx,
-              // left: (750*rpx-outBox)/2,
-              child: Container(
-                  width: 750 * rpx,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        /* 底部贴纸弹窗 */
-                        ifMakeVideo
-                            ? Container(
-                                width: 80 * rpx,
-                              )
-                            : FlatButton(
-                                child: IconWithText(
-                                  icon: Icon(
-                                    Icons.emoji_emotions_outlined,
-                                    color: Colors.white,
-                                  ),
-                                  text: "Vup",
-                                ),
-                                padding: EdgeInsets.all(0),
-                                onPressed: () {},
-                              ),
-
-                        /* 底部自制 */
-                        ifMakeVideo
-                            ? AnimVideoButton(
-                                rpx: rpx,
-                                outWidth: outBox,
-                                innerWidth: innerBox - 30 * rpx,
-                                provider: provider,
-                              )
-                            : CircleTakePhoto(
-                                outBox: outBox,
-                                innerBox: innerBox,
-                              ),
-                        ifMakeVideo
-                            ? IconButton(
-                                padding: EdgeInsets.all(0),
-                                icon: Icon(
-                                  Icons.check_circle,
-                                  color: Theme.of(context).primaryColorLight,
-                                  //Color.fromARGB(255, 219, 48, 85),
-                                  size: 80 * rpx,
-                                ),
-                                onPressed: () async {
-                                  provider.cameraController
-                                      .stopVideoRecording();
-                                  // await ImageGallerySaver.saveFile(
-                                  //     provider.fileName);
-                                  // File(provider.fileName).delete();
-                                },
-                              )
-                            : IconWithText(
-                                icon: Icon(
-                                  Icons.tonality_outlined,
-                                  color: Colors.white,
-                                ),
-                                text: "自制"),
-                      ])),
-            ),
-            !ifMakeVideo
-                ? Positioned(
-                    bottom: 40 * rpx,
-                    child: ScrollBottomBar(
-                      rpx: rpx,
+                      text: "Vup",
                     ),
+                    padding: EdgeInsets.all(0),
+                    onPressed: () {},
+                  ),
+
+                  /* 底部自制 */
+                  ifMakeVideo
+                      ? AnimVideoButton(
+                    rpx: rpx,
+                    outWidth: outBox,
+                    innerWidth: innerBox - 30 * rpx,
+                    provider: provider,
                   )
-                : Positioned(
-                    bottom: 40 * rpx,
-                    child: Container(),
+                      : CircleTakePhoto(
+                    outBox: outBox,
+                    innerBox: innerBox,
                   ),
-            Positioned(
-              right: 30 * rpx,
-              top: 100 * rpx,
-              child: IconButton(
-                  icon: Icon(
-                    Icons.cached_rounded,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    provider.changeCamera();
-                  }),
-            )
-          ])
+                  ifMakeVideo
+                      ? IconButton(
+                    padding: EdgeInsets.all(0),
+                    icon: Icon(
+                      Icons.check_circle,
+                      color: Theme.of(context).primaryColorLight,
+                      //Color.fromARGB(255, 219, 48, 85),
+                      size: 80 * rpx,
+                    ),
+                    onPressed: () async {
+                      provider.cameraController
+                          .stopVideoRecording();
+                      // await ImageGallerySaver.saveFile(
+                      //     provider.fileName);
+                      // File(provider.fileName).delete();
+                    },
+                  )
+                      : IconWithText(
+                      icon: Icon(
+                        Icons.tonality_outlined,
+                        color: Colors.white,
+                      ),
+                      text: "自制"),
+                ])),
+      ),
+      !ifMakeVideo
+          ? Positioned(
+        bottom: 40 * rpx,
+        child: ScrollBottomBar(
+          rpx: rpx,
+        ),
+      )
+          : Positioned(
+        bottom: 40 * rpx,
+        child: Container(),
+      ),
+      Positioned(
+        right: 30 * rpx,
+        top: 100 * rpx,
+        child: IconButton(
+            icon: Icon(
+              Icons.cached_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              provider.changeCamera();
+            }),
+      )
+    ])
         : Container();
   }
 }
@@ -367,10 +367,10 @@ class IconWithText extends StatelessWidget {
 class AnimVideoButton extends StatefulWidget {
   AnimVideoButton(
       {Key key,
-      @required this.outWidth,
-      @required this.innerWidth,
-      @required this.rpx,
-      @required this.provider})
+        @required this.outWidth,
+        @required this.innerWidth,
+        @required this.rpx,
+        @required this.provider})
       : super(key: key);
   final double outWidth;
   final double innerWidth;
@@ -414,12 +414,12 @@ class _AnimVideoButtonState extends State<AnimVideoButton>
     controller =
         AnimationController(duration: Duration(milliseconds: 500), vsync: this);
     animation =
-        Tween<double>(begin: outBorder, end: maxBorder).animate(controller)
-          ..addListener(() {
-            setState(() {
-              curBorder = animation.value;
-            });
-          });
+    Tween<double>(begin: outBorder, end: maxBorder).animate(controller)
+      ..addListener(() {
+        setState(() {
+          curBorder = animation.value;
+        });
+      });
     controller.repeat(reverse: true);
   }
 
@@ -455,29 +455,29 @@ class _AnimVideoButtonState extends State<AnimVideoButton>
       child: Container(
         child: !ifRecording
             ? IconButton(
-                padding: EdgeInsets.all(0),
-                icon: Icon(
-                  Icons.play_arrow,
-                  size: innerWidth,
-                  color: Theme.of(context)
-                      .primaryColorLight, //Color.fromARGB(255, 219, 48, 85),
-                ),
-                onPressed: () {
-                  resumeRecording();
-                },
-              )
+          padding: EdgeInsets.all(0),
+          icon: Icon(
+            Icons.play_arrow,
+            size: innerWidth,
+            color: Theme.of(context)
+                .primaryColorLight, //Color.fromARGB(255, 219, 48, 85),
+          ),
+          onPressed: () {
+            resumeRecording();
+          },
+        )
             : IconButton(
-                padding: EdgeInsets.all(0),
-                icon: Icon(
-                  Icons.pause,
-                  size: innerWidth,
-                  color: Theme.of(context)
-                      .primaryColorLight, //Color.fromARGB(255, 219, 48, 85),
-                ),
-                onPressed: () {
-                  pauseRecording();
-                },
-              ),
+          padding: EdgeInsets.all(0),
+          icon: Icon(
+            Icons.pause,
+            size: innerWidth,
+            color: Theme.of(context)
+                .primaryColorLight, //Color.fromARGB(255, 219, 48, 85),
+          ),
+          onPressed: () {
+            pauseRecording();
+          },
+        ),
       ),
     );
   }

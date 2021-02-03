@@ -81,7 +81,7 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
       width: 750 * rpx,
       height: 600 * rpx,
       decoration: BoxDecoration(
-          //borderRadius: BorderRadius.circular(20),
+        //borderRadius: BorderRadius.circular(20),
           color: Colors.black),
       child: Stack(
         children: [
@@ -117,10 +117,10 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
                     child: imagePath == null
                         ? Center(child: Container(child: Text("左下角选个形象吧~"),))
                         : ImagesAnimation(
-                            w: 100,
-                            h: 100,
-                            entry: ImagesAnimationEntry(0, 4,
-                                "assets/poser_img/$imagePath/$imagePath-%s-0-1.png")),
+                        w: 100,
+                        h: 100,
+                        entry: ImagesAnimationEntry(0, 4,
+                            "assets/poser_img/$imagePath/$imagePath-%s-0-1.png")),
 //"images/men_sport_%s.png" 表示图片在你本地的路径，%s会被下标代替,
 
                     // child: (faces == null || faces.length == 0)
@@ -165,7 +165,7 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
   Future<Uint8List> _capturePng() async {
     try {
       RenderRepaintBoundary boundary =
-          animateWidgetKey.currentContext.findRenderObject();
+      animateWidgetKey.currentContext.findRenderObject();
       // boundary.
       var image = await boundary.toImage(pixelRatio: 3.0);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
@@ -190,8 +190,8 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
 
   _getEAR(List<Offset> leftEye) {
     return (_EuclideanDist(leftEye[3], leftEye[13]) +
-            _EuclideanDist(leftEye[4], leftEye[12]) +
-            _EuclideanDist(leftEye[5], leftEye[11])) /
+        _EuclideanDist(leftEye[4], leftEye[12]) +
+        _EuclideanDist(leftEye[5], leftEye[11])) /
         (3 * _EuclideanDist(leftEye[0], leftEye[8]));
   }
 
@@ -257,7 +257,7 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
     var rightEAR = _getEAR(rightEye);
 
     var MAR = (_EuclideanDist(lowerLipTop[4], upperLipBottom[4]) +
-            _EuclideanDist(lowerLipTop[5], upperLipBottom[5])) /
+        _EuclideanDist(lowerLipTop[5], upperLipBottom[5])) /
         (_EuclideanDist(lowerLipTop[0], lowerLipTop[8]) +
             _EuclideanDist(upperLipBottom[0], upperLipBottom[8]));
 
