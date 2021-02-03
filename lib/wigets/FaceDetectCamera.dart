@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:helpers/helpers.dart';
 import 'package:cyber_waves/providers/FaceCameraProvider.dart';
 import 'package:cyber_waves/wigets/WaifuAnimate.dart';
 import 'package:cyber_waves/wigets/video_timer.dart';
@@ -15,6 +16,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quiver/async.dart';
+import 'package:cyber_waves/pages/VideoEditorPage.dart';
 
 class FaceCameraMain extends StatefulWidget {
   const FaceCameraMain(
@@ -41,8 +43,9 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
   List<Face> faces;
   CustomPainter painter;
   bool cameraEnabled = true;
-  bool _isDetecting = true;
+  bool _isDetecting = false;
   bool _ctrlBtnVisible = true;
+
   var cmIdx = 0; //0 后置
   var quality = ResolutionPreset.low;
   var _imagePath;
@@ -53,7 +56,8 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
 
   double rpx;
   bool _stickerVisible = false;
-  bool _isRecording = false;
+  bool _isRecordScreen = false;
+  bool _isRecordVoice = true;
   final _timerKey = GlobalKey<VideoTimerState>();
   IconData _faceDetectIcon = Icons.face_unlock_outlined;
   IconData _cameraIcon = Icons.camera_rear_outlined;
@@ -79,7 +83,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     requestPermissions();
     startTimer();
 
-    stickerList = ["haru", "rize", "sakura", "haru", "rize", "sakura"];
+    stickerList = ["haru", "rize", "sakura", "hosh", "higu", "mito"];
 
     _initializeCamera();
   }
@@ -180,29 +184,38 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                                     });
                                   },
                                   child: _getCameraIcon(
-                                      Icons.camera_enhance_outlined,
+                                      cameraEnabled
+                                          ? Icons.camera_enhance_outlined
+                                          : Icons.linked_camera_outlined,
                                       "相机",
-                                      Colors.white)),
+                                      _getIconColor(cameraEnabled))),
                               _getCameraIcon(Icons.camera, "画质", Colors.white),
                               InkWell(
                                 onTap: () {
                                   _detectFace();
                                   setState(() {
                                     _isDetecting = !_isDetecting;
-                                    if (_isDetecting) {
-                                      _faceDetectIcon =
-                                          Icons.face_retouching_natural;
-                                      _faceDetectColor = Colors.white;
-                                    } else {
-                                      _faceDetectIcon =
-                                          Icons.face_unlock_rounded;
-                                      _faceDetectColor = Colors.white38;
-                                    }
                                   });
                                 },
                                 child: _getCameraIcon(
-                                    _faceDetectIcon, "面捕", _faceDetectColor),
-                              )
+                                    _isDetecting
+                                        ? Icons.face_retouching_natural
+                                        : Icons.face_unlock_rounded,
+                                    "面捕",
+                                    _getIconColor(_isDetecting)),
+                              ),
+                              InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _isRecordVoice = !_isRecordVoice;
+                                    });
+                                  },
+                                  child: _getCameraIcon(
+                                      _isRecordVoice
+                                          ? Icons.record_voice_over_outlined
+                                          : Icons.voice_over_off_outlined,
+                                      "声音",
+                                      _getIconColor(_isRecordVoice))),
                             ],
                           ),
                         ),
@@ -245,17 +258,17 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
                       InkWell(
                           onTap: () {
                             if (_imagePath != null) {
-                              if (_isRecording) {
+                              if (_isRecordScreen) {
                                 // 停止录屏
                                 stopScreenRecord();
                               } else {
                                 // 开始录屏
-                                startScreenRecord(false);
+                                startScreenRecord(_isRecordVoice);
                               }
                             }
                           },
                           child: _getCameraCtrlBtn(
-                              _isRecording
+                              _isRecordScreen
                                   ? Icons.pause_circle_outline
                                   : Icons.play_circle_outline,
                               _imagePath == null ? Colors.grey : Colors.white,
@@ -371,6 +384,10 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     }
   }
 
+  Color _getIconColor(bool flag) {
+    return flag ? Colors.white : Colors.white38;
+  }
+
   /* 切换前后置摄像头 */
   Future<void> _onCameraSwitch() async {
     CameraDescription cameraDescription;
@@ -425,15 +442,15 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
 
     if (audio) {
       start = await FlutterScreenRecording.startRecordScreenAndAudio(
-        "AnimateWithAudio_${_time.toString()})",
+        "AnimateWithAudio_${_timestamp()})",
       ); //titleNotification: "dsffad",messageNotification: "sdffd"
     } else {
       start = await FlutterScreenRecording.startRecordScreen(
-          "Animate_${_time.toString()}"); //,titleNotification: "dsffad",messageNotification: "sdffd"
+          "Animate_${_timestamp()}"); //,titleNotification: "dsffad",messageNotification: "sdffd"
     }
     if (start) {
       setState(() {
-        _isRecording = !_isRecording;
+        _isRecordScreen = !_isRecordScreen;
         _ctrlBtnVisible = false;
       });
     }
@@ -445,12 +462,13 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     String path = await FlutterScreenRecording.stopRecordScreen;
     _timerKey.currentState.stopTimer();
     setState(() {
-      _isRecording = !_isRecording;
+      _isRecordScreen = !_isRecordScreen;
       _ctrlBtnVisible = true;
     });
     print("Opening video");
     print(path);
-    OpenFile.open(path);
+    PushRoute.page(context, VideoEditor(file: File(path)));
+    // OpenFile.open(path);
   }
 
   /* 获取当前时间戳 */
@@ -468,7 +486,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
       return null;
     }
     setState(() {
-      _isRecording = true;
+      _isRecordScreen = true;
     });
     _timerKey.currentState.startTimer();
 
@@ -500,7 +518,7 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     }
     _timerKey.currentState.stopTimer();
     setState(() {
-      _isRecording = false;
+      _isRecordScreen = false;
     });
 
     try {

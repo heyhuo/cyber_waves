@@ -29,31 +29,6 @@ class _MakerMainState extends State<MakerMain> {
     // _controller=provider.cameraController;
   }
 
-  /*_getWaifuList(imgList){
-    Column(
-        children: [List.generate(imgList.length, (index){
-          return Row(children: [List.],);
-        })]);
-    Row(
-      children: [
-        _getWaifu("sakura.png"),
-        _getWaifu("sakura.png"),
-      ],
-    )
-  }*/
-  // _getWaifu(imgName) {
-  //   return Container(
-  //     margin: EdgeInsets.only(left: 12 * rpx, top: 10 * rpx),
-  //     padding: EdgeInsets.only(top: 10),
-  //     width: 355 * rpx,
-  //     height: 320 * rpx,
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(20),
-  //       //color: Theme.of(context).primaryColor.withOpacity(0.6),
-  //     ),
-  //     child: Image.asset("assets/waifus/${imgName}"),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

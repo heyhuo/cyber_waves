@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -61,28 +60,74 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Future _loadModel(useGpu) async {
+//   // 模型文件的名称
+//   final _modelFile = 'morpher_gpu_32.tflite';
+//
+//   // final gpuDelegateV2 = GpuDelegateV2(
+//   //     options: GpuDelegateOptionsV2(
+//   //   false,
+//   //   TfLiteGpuInferenceUsage.preferenceSustainSpeed,
+//   //   TfLiteGpuInferencePriority.minLatency,
+//   //   TfLiteGpuInferencePriority.auto,
+//   //   TfLiteGpuInferencePriority.auto,
+//   // ));
+//
+//   Interpreter _interpreter;
+//   if (useGpu) {
+//     // var interpreterOptions = InterpreterOptions()..addDelegate(gpuDelegateV2);
+//     // var interpreterOptions = InterpreterOptions()..useNnApiForAndroid = true;
+//
+//     // TensorFlow Lite 解释器对象
+//     // _interpreter =
+//     // await Interpreter.fromAsset(_modelFile, options: interpreterOptions);
+//   } else {
+//     var interpreterOptions = InterpreterOptions()..useNnApiForAndroid = true;
+//     _interpreter = await Interpreter.fromAsset(_modelFile,
+//         options: InterpreterOptions()..threads = 3);
+//   }
+//
+//   print('Interpreter loaded successfully');
+//
+//   // 加载张量
+//   _interpreter.allocateTensors();
+//   // 打印 input tensor 列表
+//   print(_interpreter.getInputTensors());
+//   // 打印 output tensor 列表
+//   print(_interpreter.getOutputTensors());
+//
+//   var name = "assets/images/waifu_03_256.png";
+//   var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
+//   img.Image image = img.decodePng(imageBytes);
+//
+//   print(image.length);
+//   var imgBytes = imageToByte(image, 256).reshape([1, 4, 256, 256]);
+//   var morParam = [
+//     [0.5, 0.5, 0.5]
+//   ];
+//
+//   // input: List<Object>
+//   var inputs = [imgBytes, morParam];
+//
+//   var output0 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
+//   var output1 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
+//   // output: Map<int, Object>
+//   var outputs = {0: output0, 1: output1};
+//
+//   for (var i = 0; i < 10; i++) {
+//     int startTime = new DateTime.now().millisecondsSinceEpoch;
+//     // inference
+//     _interpreter.runForMultipleInputs(inputs, outputs);
+//     int endTime = new DateTime.now().millisecondsSinceEpoch;
+//     print("Inference took ${endTime - startTime}");
+//     // print outputs
+//     print(outputs);
+//   }
+//
+//   // print(imageBytes);
+// }
 
 
-Float32List imageToByte(img.Image image, int inputSize) {
-  var float32list = Float32List(inputSize * inputSize * 4);
-  var buffer = Float32List.view(float32list.buffer);
-  int pidx = 0;
-  double mean = 0, std = 255.0;
-  for (var i = 0; i < inputSize; i++) {
-    for (var j = 0; j < inputSize; j++) {
-      var pixel = image.getPixel(j, i);
-
-      buffer[256 * i + j] = (img.getRed(pixel) - mean) / std;
-      buffer[256 * i + j + 256] = (img.getGreen(pixel) - mean) / std;
-      buffer[256 * i + j + 512] = (img.getBlue(pixel) - mean) / std;
-      buffer[256 * i + j + 768] = (img.getAlpha(pixel) - mean) / std;
-    }
-  }
-
-  var imgBytes = float32list.buffer.asFloat32List();
-  print(imgBytes[25700]);
-  return imgBytes;
-}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -104,78 +149,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // for (var i = 0; i < 4; i++) {
-    //   for (var j = 0; j < 4; j++) {
-    //     for (var k = 0; k < 4; k++) {
-    //       list.add(
-    //           "assets/poser_img/sakura-0.${i * 3}-0.${j * 3}-0.${k * 3}.png");
-    //       // list[i] = ;
-    //     }
-    //   }
-    // }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).primaryColorLight,
       ),
       body: MainWidget(rpx:MediaQuery.of(context).size.width/750),
-      // body: Column(
-      //   children: [
-      //     /*相机预览界面*/
-      //     Container(
-      //       width: 850,
-      //       height: 734,
-      //       color: Theme.of(context).primaryColorDark,
-      //       child:MainWidget(rpx:MediaQuery.of(context).size.width/750),
-      //     ),
-      //   ],
-      // ),
 
-      /*Container(
-        color: Theme.of(context).primaryColorDark,
-        child: SingleChildScrollView(
-          child: Column(children: <Widget>[
-            Container(
-              child: AnimationWidget(
-                _key,
-                list,
-                width: 200,
-                height: 200,
-                interval: 150,
-                start: true,
-              ),
-              //Image.asset(name),
-              width: 256 * 2.5,
-              height: 256,
-            ),
-            RaisedButton(
-              onPressed: _getDecodeImg,
-              child: Text("load"),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: //Temp(),
-                  CameraMain(
-                size:  MediaQuery.of(context).size,//Size(400.0,400.0),
-                    */ /*context
-                        ?.findRenderObject()
-                        ?.paintBounds
-                        ?.size,*/ /*
-              ),
-              */ /*FlareActor("assets/riv/Anime.flr",
-                alignment: Alignment.center,
-                fit: BoxFit.contain,
-                animation: "buiteful_gril"),*/ /*
-              width: 256 * 2.5,
-              height: 430,
-              decoration: BoxDecoration(
-                color: Color(0xff1E88A8),
-              ),
-            ),
-          ]),
-        ),
-      ),*/
       bottomNavigationBar: BottomAppBar(
         notchMargin: 1,
         color: Theme.of(context).primaryColorLight,
@@ -212,22 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  _getDecodeImg() async {
-    // File im = File(name);
-    // img.Image.f
-    var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
-    // var bImage = img.Image.fromBytes(256, 256, imageBytes, format: img.Format.argb);
 
-    img.Image image = img.decodePng(imageBytes);
-    //
-    print(image.length);
-    var imgBytes = imageToByte(image, 256);
-
-    setState(() {
-      // setState_bytes = imgBytes;
-      // _ss = bImage;
-    });
-  }
 
   Container _getCont(double _height) {
     return Container(
@@ -244,9 +209,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-
-
-
-
-
