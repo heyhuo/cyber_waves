@@ -1,8 +1,10 @@
 import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/pages/Pace.dart';
+import 'package:cyber_waves/pages/SelectUploadModePage.dart';
 import 'package:cyber_waves/providers/CameraProvider.dart';
 import 'package:cyber_waves/providers/FaceCameraProvider.dart';
 import 'package:cyber_waves/providers/PostsGalleryProvider.dart';
+import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/MakerMain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,8 +29,8 @@ import 'CameraMain.dart';
 // }
 
 class BtmBar extends StatefulWidget {
-  BtmBar({Key key, this.selectIndex}) : super(key: key);
-
+  BtmBar({Key key, this.rpx, this.selectIndex}) : super(key: key);
+  final double rpx;
   final int selectIndex;
 
   @override
@@ -38,6 +40,7 @@ class BtmBar extends StatefulWidget {
 class _BtmBarState extends State<BtmBar> {
   List<bool> selected = List<bool>();
   List<String> selectItems = List<String>();
+  double rpx;
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _BtmBarState extends State<BtmBar> {
       selected.add(false);
     }
     selected[widget.selectIndex] = true;
+    rpx = widget.rpx;
   }
 
   @override
@@ -100,63 +104,53 @@ class _BtmBarState extends State<BtmBar> {
 
       /*底部菜单滑出界面*/
       case 2:
-        Container(
-          width: 100,
-          height: 100,
-          color: Colors.white,
-        );
-        double rpx = MediaQuery.of(context).size.width / 750;
-        showModalBottomSheet(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-            backgroundColor: Colors.transparent,
-            isScrollControlled: true,
-            context: context,
-            builder: (BuildContext context) {
-              return Container(
-                color: Colors.black.withOpacity(0.1),
-                height: MediaQuery.of(context).size.height,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        /*Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    MakerPage()));*/
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return MultiProvider(providers: [
-                                    ChangeNotifierProvider(
-                                      create: (_) => FaceCameraProvider(),
-                                    )
-                                  ], child: MakerPage());
-                                },
-                                fullscreenDialog: true));
-                      },
-                      child: _getBtmModalBtn(
-                          rpx, "assets/images/btm_bg2.png", "贴纸", "直接使用就完事了~"),
-                    ),
-                  ],
-                ),
-              );
-            });
-        /*Navigator.of(context).push(new MaterialPageRoute(
-            builder: (BuildContext context) {
-              return MultiProvider(
-                providers: [
-                  ChangeNotifierProvider(
-                    create: (_) => CameraProvider(),
-                  )
-                ],
-                child: MakerPage(),
-              );
-            },
-            fullscreenDialog: true));*/
+        // Container(
+        //   width: 100,
+        //   height: 100,
+        //   color: Colors.white,
+        // );
+        // double rpx = MediaQuery.of(context).size.width / 750;
+        // showModalBottomSheet(
+        //     shape:
+        //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+        //     backgroundColor: Colors.transparent,
+        //     isScrollControlled: true,
+        //     context: context,
+        //     builder: (BuildContext context) {
+        //       return Container(
+        //         color: Colors.black.withOpacity(0.1),
+        //         height: MediaQuery.of(context).size.height,
+        //         child: Row(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           children: [
+        //             GestureDetector(
+        //               onTap: () {
+        //                 /*Navigator.push(
+        //                     context,
+        //                     MaterialPageRoute(
+        //                         builder: (BuildContext context) =>
+        //                             MakerPage()));*/
+        //                 Navigator.push(
+        //                     context,
+        //                     MaterialPageRoute(
+        //                         builder: (BuildContext context) {
+        //                           return MultiProvider(providers: [
+        //                             ChangeNotifierProvider(
+        //                               create: (_) => FaceCameraProvider(),
+        //                             )
+        //                           ], child: MakerPage());
+        //                         },
+        //                         fullscreenDialog: true));
+        //               },
+        //               child: _getBtmModalBtn(
+        //                   rpx, "assets/images/btm_bg2.png", "贴纸", "直接使用就完事了~"),
+        //             ),
+        //           ],
+        //         ),
+        //       );
+        //     });
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => SelectUploadPage(rpx:rpx)));
         break;
 
       default:
@@ -167,15 +161,16 @@ class _BtmBarState extends State<BtmBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 100 * rpx,
+      width: 750 * rpx,
+      color: Theme.of(context).primaryColorLight.withOpacity(0.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           getBtmTextWiget(context, "踱步", selected[0], () {
             tapItem(0);
           }),
-          AddIcon(tapItem: () {
-            tapItem(2);
-          }),
+          AddIcon(),
           getBtmTextWiget(context, "潜行", selected[1], () {
             tapItem(1);
           })
@@ -192,7 +187,7 @@ getBtmTextWiget(context, String content, bool ifSelected, tapFunc) {
         style: ifSelected
             ? TextStyle(
                 fontSize: 16,
-                color: Color(0xff2c3839),
+                color: Color(0xffffffff),
                 fontWeight: FontWeight.w600)
             : TextStyle(
                 fontSize: 16,
@@ -203,11 +198,11 @@ getBtmTextWiget(context, String content, bool ifSelected, tapFunc) {
 }
 
 class AddIcon extends StatelessWidget {
-  const AddIcon({Key key, @required this.tapItem}) : super(key: key);
-  final VoidCallback tapItem;
+  const AddIcon({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    UploadBtnProvider provider = Provider.of<UploadBtnProvider>(context);
     double rpx = MediaQuery.of(context).size.width / 750;
     double iconHeight = 55 * rpx;
     double totalWidth = 90 * rpx;
@@ -219,8 +214,9 @@ class AddIcon extends StatelessWidget {
       width: 60,
       child: FlatButton(
         padding: EdgeInsets.all(0),
+        // 上传按钮
         onPressed: () {
-          tapItem();
+          provider.setVisible();
         },
         child: Stack(
           children: [

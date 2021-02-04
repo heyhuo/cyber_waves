@@ -3,12 +3,15 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
+import 'package:cyber_waves/pages/SelectUploadModePage.dart';
+import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/BottomBar.dart';
 import 'package:cyber_waves/wigets/MainWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -52,10 +55,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // primaryColorDark: Color(0xff566C73),  //綪御纳户
         primaryColorDark: Color(0xffffffff), //綪御纳户566C73
-        primaryColorLight: Color(0xff78C2C4).withOpacity(0.3),
+        primaryColorLight: Color(0xff78C2C4),
         primaryColor: Color(0xff3d6263),
       ),
-      home: MyHomePage(title: 'Cyber Wave 🌊'),
+      home: MyHomePage(),
     );
   }
 }
@@ -127,12 +130,8 @@ class MyApp extends StatelessWidget {
 //   // print(imageBytes);
 // }
 
-
-
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
+  MyHomePage({Key key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -143,33 +142,76 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // var listName = "assets/poser_img/waifu-0..png";
   var list = new List<String>();
+  double rpx;
+  bool uploadBtnVisible = false;
 
   // final GlobalKey<_AnimationWidgetState> _key =
   // new GlobalKey<_AnimationWidgetState>();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Theme.of(context).primaryColorLight,
-      ),
-      body: MainWidget(rpx:MediaQuery.of(context).size.width/750),
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
-      bottomNavigationBar: BottomAppBar(
-        notchMargin: 1,
-        color: Theme.of(context).primaryColorLight,
-        child: Container(
-          // padding: EdgeInsets.only(top: 10),
-          height: 50,
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColorLight,
-          ),
-          child: BtmBar(
-            selectIndex: 0,
-          ),
-        ),
-      ),
+  @override
+  Widget build(BuildContext context) {
+    rpx = MediaQuery.of(context).size.width / 750;
+
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: Text(widget.title),
+      //   backgroundColor: Theme.of(context).primaryColorLight,
+      // ),
+      body: MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+                create: (context) => UploadBtnProvider(false))
+          ],
+          child: Stack(
+            children: [
+              /*抬头tab*/
+              Positioned(
+                  child: Container(
+                height: 100 * rpx,
+                width: 750 * rpx,
+                color: Colors.black.withOpacity(0.5),
+              )),
+              /*滚动列表*/
+              Positioned(
+                  child: Container(
+                margin: EdgeInsets.only(top: 100 * rpx),
+                width: 750 * rpx,
+                height: MediaQuery.of(context).size.height,
+                child: MainWidget(rpx: rpx),
+              )),
+              /*底部*/
+              Positioned(
+                bottom: 0,
+                child: BtmBar(
+                  rpx: rpx,
+                  selectIndex: 0,
+                ),
+              ),
+              // /*上传按钮选项遮罩*/
+              SelectUploadPage(rpx: rpx)
+            ],
+          )),
+
+      // bottomNavigationBar: BottomAppBar(
+      //   notchMargin: 1,
+      //   color: Theme.of(context).primaryColorLight,
+      //   child: Container(
+      //     // padding: EdgeInsets.only(top: 10),
+      //     height: 50,
+      //     decoration: BoxDecoration(
+      //       color: Theme.of(context).primaryColorLight,
+      //     ),
+      //     child: BtmBar(
+      //       selectIndex: 0,
+      //     ),
+      //   ),
+      // ),
       /*  floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -192,8 +234,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-
   Container _getCont(double _height) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -209,3 +249,124 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+// // Copyright 2019 The Flutter Authors. All rights reserved.
+// // Use of this source code is governed by a BSD-style license that can be
+// // found in the LICENSE file.
+//
+// import 'package:flutter/material.dart';
+// import 'package:flutter/scheduler.dart';
+//
+// import 'package:cyber_waves/wigets/a.dart';
+//
+// void main() {
+//   runApp(
+//     MaterialApp(
+//       theme: ThemeData.from(
+//         colorScheme: const ColorScheme.light(),
+//       ).copyWith(
+//         pageTransitionsTheme: const PageTransitionsTheme(
+//           builders: <TargetPlatform, PageTransitionsBuilder>{
+//             TargetPlatform.android: ZoomPageTransitionsBuilder(),
+//           },
+//         ),
+//       ),
+//       home: _TransitionsHomePage(),
+//     ),
+//   );
+// }
+//
+// class _TransitionsHomePage extends StatefulWidget {
+//   @override
+//   _TransitionsHomePageState createState() => _TransitionsHomePageState();
+// }
+//
+// class _TransitionsHomePageState extends State<_TransitionsHomePage> {
+//   bool _slowAnimations = false;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Material Transitions')),
+//       body: Column(
+//         children: <Widget>[
+//           Expanded(
+//             child: ListView(
+//               children: <Widget>[
+//                 _TransitionListTile(
+//                   title: 'Container transform',
+//                   subtitle: 'OpenContainer',
+//                   onTap: () {
+//                     Navigator.of(context).push(
+//                       MaterialPageRoute<void>(
+//                         builder: (BuildContext context) {
+//                           return OpenContainerTransformDemo();
+//                         },
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ],
+//             ),
+//           ),
+//           const Divider(height: 0.0),
+//           SafeArea(
+//             child: SwitchListTile(
+//               value: _slowAnimations,
+//               onChanged: (bool value) async {
+//                 setState(() {
+//                   _slowAnimations = value;
+//                 });
+//                 // Wait until the Switch is done animating before actually slowing
+//                 // down time.
+//                 if (_slowAnimations) {
+//                   await Future<void>.delayed(const Duration(milliseconds: 300));
+//                 }
+//                 timeDilation = _slowAnimations ? 20.0 : 1.0;
+//               },
+//               title: const Text('Slow animations'),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+//
+// class _TransitionListTile extends StatelessWidget {
+//   const _TransitionListTile({
+//     this.onTap,
+//     @required this.title,
+//     @required this.subtitle,
+//   });
+//
+//   final GestureTapCallback onTap;
+//   final String title;
+//   final String subtitle;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       contentPadding: const EdgeInsets.symmetric(
+//         horizontal: 15.0,
+//       ),
+//       leading: Container(
+//         width: 40.0,
+//         height: 40.0,
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(20.0),
+//           border: Border.all(
+//             color: Colors.black54,
+//           ),
+//         ),
+//         child: const Icon(
+//           Icons.play_arrow,
+//           size: 35,
+//         ),
+//       ),
+//       onTap: onTap,
+//       title: Text(title),
+//       subtitle: Text(subtitle),
+//     );
+//   }
+// }
