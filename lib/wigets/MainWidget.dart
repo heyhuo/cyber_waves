@@ -83,13 +83,21 @@ class _UserContentItemState extends State<UserContentItem> {
                 margin: EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    Container(
-                      width: 600 * rpx,
-                      // color: Colors.blue,
-                      child: Text(
-                        "中之人sakura",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 600 * rpx,
+                              // color: Colors.blue,
+                              child: Text(
+                                "中之人sakura",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     Container(
                       child: Row(
@@ -101,7 +109,8 @@ class _UserContentItemState extends State<UserContentItem> {
                     ),
                     Container(
                         width: 600 * rpx,
-                        padding: EdgeInsets.only(right: 10 * rpx),
+                        color: Colors.red,
+                        // padding: EdgeInsets.only(right: 10 * rpx),
                         child: Container(
                             child: Text(
                               "文字描述字描述文\n字描述字描述文字描述字\n描述",
@@ -113,7 +122,7 @@ class _UserContentItemState extends State<UserContentItem> {
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       height: 600 * rpx,
-                      // color: Colors.yellow,
+                      color: Colors.yellow,
                       child: isVedio ? Text("") : _getUserGridViewPics(),
                     ),
                   ],
@@ -157,8 +166,9 @@ class _UserContentItemState extends State<UserContentItem> {
           image: DecorationImage(
               image: AssetImage("assets/images/bg1.jpg"),
               scale: 0.1,
-              fit: BoxFit.fitHeight)),
-      height: 300 * rpx,
+              fit: BoxFit.fitWidth)),
+      height: 100 * rpx,
+      width: 100*rpx,
     );
   }
 

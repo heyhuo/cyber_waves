@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:camera/camera.dart';
 import 'package:cyber_waves/providers/FaceCameraProvider.dart';
+import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cyber_waves/wigets/FaceDetectCamera.dart';
@@ -18,7 +19,8 @@ class MakerMain extends StatefulWidget {
 class _MakerMainState extends State<MakerMain> {
   double rpx;
   bool _stickerVisible = false;
-  FaceCameraProvider provider;
+  FaceCameraProvider _cameraProvider;
+  UploadBtnProvider _uploadBtnProvider;
   CameraController _controller;
 
   @override
@@ -29,11 +31,17 @@ class _MakerMainState extends State<MakerMain> {
     // _controller=provider.cameraController;
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    provider = Provider.of<FaceCameraProvider>(context);
-    if (provider == null) {
+    _cameraProvider = Provider.of<FaceCameraProvider>(context);
+    _uploadBtnProvider = Provider.of<UploadBtnProvider>(context);
+    if (_cameraProvider == null) {
       return Container(
         child: Center(child: CircularProgressIndicator()),
       );
@@ -62,8 +70,7 @@ class _MakerMainState extends State<MakerMain> {
         ),
 
         /*相机界面*/
-        FaceCameraMain(
-            size: Size(400 * rpx, 650 * rpx), rpx: rpx, provider: provider)
+        FaceCameraMain(size: Size(400 * rpx, 650 * rpx), rpx: rpx)
       ],
     );
   }

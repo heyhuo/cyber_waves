@@ -54,7 +54,13 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
     // faces = widget.faces;
     // imagePath = widget.imagePath;
     requestPermissions();
-    startTimer();
+    // startTimer();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   void startTimer() {

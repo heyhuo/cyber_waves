@@ -1,3 +1,4 @@
+import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,37 +17,16 @@ class _SelectUploadPageState extends State<SelectUploadPage>
   double rpx;
   bool _isVisible = false;
 
-//实例animation对象  和必要的控制和状态对象
-  Animation<double> _animation;
-  AnimationController _controller;
-  AnimationStatus animationStatus;
-  double animationvalue;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     rpx = widget.rpx;
-
-    //初始化一个动画控制器 定义好动画的执行时长
-    _controller = AnimationController(
-        duration: const Duration(milliseconds: 300), vsync: this);
-    //初始化一个补间动画 实例化一个补间类动画的实例，明确需要变换的区间大小和作用的controller对象
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller)
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {}
-      });
-    //提供方法 为动画添加监听
-    _controller.forward();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    _controller.dispose();
     super.dispose();
   }
 
@@ -54,74 +34,9 @@ class _SelectUploadPageState extends State<SelectUploadPage>
   Widget build(BuildContext context) {
     UploadBtnProvider provider = Provider.of<UploadBtnProvider>(context);
     _isVisible = provider.visible;
-    Color bgColor = Colors.black;
-    return !_isVisible
-        ? Container()
-        : Positioned(
-            bottom: -MediaQuery.of(context).size.height * _animation.value,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isVisible = !_isVisible;
-                });
-              },
-              child: Container(
-                width: 750 * rpx,
-                height: MediaQuery.of(context).size.height,
-                color: Colors.black.withOpacity(0.7),
-                child: Container(
-                  // color: Colors.yellow,
-                  margin: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height / 2),
-                  child: Stack(
-                    children: [
-                      UploadBtnAnimate(
-                          rpx: rpx,
-                          bottomPos: 650 * rpx,
-                          color: Colors.green.shade600,
-                          icon: Icons.account_box,
-                          title: "贴纸",
-                          subTitle: "直接使用就完事了~"),
-                      UploadBtnAnimate(
-                          rpx: rpx,
-                          bottomPos: 480 * rpx,
-                          color: Colors.orange.shade600,
-                          icon: Icons.photo,
-                          title: "图片",
-                          subTitle: "分享心爱的图片💖~"),
-                      UploadBtnAnimate(
-                          rpx: rpx,
-                          bottomPos: 310 * rpx,
-                          color: Colors.blue.shade600,
-                          icon: Icons.video_library,
-                          title: "视频",
-                          subTitle: "发布有趣的视频📹~"),
-                      Positioned(
-                        bottom: 100 * rpx,
-                        left: rpx * 320,
-                        child: GestureDetector(
-                          onTap: () {
-                            provider.setVisible();
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(top: 30),
-                            child: CircleAvatar(
-                                radius: 25,
-                                backgroundColor: Colors.white.withOpacity(0.8),
-                                child: Icon(
-                                  Icons.close,
-                                  color: Colors.black,
-                                  size: 25,
-                                )),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
+    // if(_isVisible) //提供方法 为动画添加监听
+    //   _controller.forward(from: 0);
+    return !_isVisible ? Container() : UploadAnimateBtn(rpx: rpx);
   }
 
   Widget _uploadBtn(Color color, IconData icon, String title, String subTitle) {
@@ -182,6 +97,7 @@ class UploadBtnAnimate extends StatefulWidget {
   final Color color;
   final double rpx;
   final double bottomPos;
+  final String tag;
 
   const UploadBtnAnimate(
       {Key key,
@@ -190,6 +106,7 @@ class UploadBtnAnimate extends StatefulWidget {
       @required this.color,
       @required this.icon,
       @required this.title,
+      @required this.tag,
       @required this.subTitle})
       : super(key: key);
 
@@ -201,6 +118,7 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _animation;
+  Animation _curve;
   String subTitle;
   String title;
   IconData icon;
@@ -209,6 +127,7 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
   double bottomPos;
   Color curColor;
   double curWidth;
+  String tag;
 
   @override
   void initState() {
@@ -221,8 +140,11 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
     bottomPos = widget.bottomPos;
     curWidth = 550 * rpx;
     curColor = Colors.black45;
+    tag = widget.tag;
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
 
     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
       ..addListener(() {
@@ -240,12 +162,180 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
 
   @override
   Widget build(BuildContext context) {
-    var txtWidth = 360 * rpx;
+    UploadBtnProvider provider = Provider.of<UploadBtnProvider>(context);
+    var txtWidth = 300 * rpx;
     return Positioned(
-        bottom: bottomPos * _animation.value,
+        bottom: bottomPos,
         left: 100 * rpx,
+        child: InkWell(
+          onTap: () {
+            provider.setHeroTag(tag, context);
+          },
+          child: Hero(
+            tag: tag,
+            child: Container(
+              width: curWidth,
+              height: 150 * rpx,
+              padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
+              margin: EdgeInsets.only(top: 40 * rpx),
+              decoration: BoxDecoration(
+                  color: color, borderRadius: BorderRadius.circular(20.0)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 50.0,
+                  ),
+                  Container(
+                    width: txtWidth,
+                    // color: Colors.yellow,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          width: txtWidth,
+                          // color: Colors.yellow,
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Container(
+                          width: txtWidth,
+                          child: Text(
+                            subTitle,
+                            style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 13),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+}
+
+class UploadAnimateBtn extends StatefulWidget {
+  const UploadAnimateBtn({Key key, @required this.rpx}) : super(key: key);
+  final double rpx;
+
+  @override
+  _UploadAnimateBtnState createState() => _UploadAnimateBtnState();
+}
+
+class _UploadAnimateBtnState extends State<UploadAnimateBtn>
+    with SingleTickerProviderStateMixin {
+  double rpx;
+  UploadBtnProvider provider;
+  AnimationController _controller;
+  Animation<double> _animation;
+  Animation _curve;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    rpx = widget.rpx;
+
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.bounceIn);
+
+    _animation = Tween(begin: 1.0, end: 0.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          // curColor = color;
+          // curWidth = 550*rpx;
+        }
+      });
+
+    _controller.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    provider = Provider.of<UploadBtnProvider>(context);
+    return Positioned(
+      bottom: 0,//-MediaQuery.of(context).size.height * _animation.value,
+      child: Container(
+        width: 750 * rpx,
+        height: MediaQuery.of(context).size.height,
+        color: Colors.black.withOpacity(0.7),
         child: Container(
-          width: curWidth,
+          // color: Colors.yellow,
+          margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 100*rpx,
+                bottom:(-MediaQuery.of(context).size.height/2) * _animation.value +300*rpx,
+                child: Column(
+                  children: [
+                    _getUploadBtn(rpx, 650 * rpx, Colors.green.shade600,
+                        Icons.account_box, "贴纸", "sticker", "直接使用就完事了~"),
+                    _getUploadBtn(rpx, 480 * rpx, Colors.orange.shade600, Icons.photo,
+                        "图片", "picture", "分享心爱的图片💖~"),
+                    _getUploadBtn(rpx, 310 * rpx, Colors.blue.shade600,
+                        Icons.video_library, "视频", "video", "发布有趣的视频📹~"),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 100 * rpx,
+                left: rpx * 320,
+                child: GestureDetector(
+                  onTap: () {
+                    provider.setVisible();
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(top: 30),
+                    child: CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white.withOpacity(0.8),
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.black,
+                          size: 25,
+                        )),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getUploadBtn(rpx, bottomPos, color, icon, title, tag, subTitle) {
+    var txtWidth = 300 * rpx;
+    // return Positioned(
+    //     bottom: bottomPos,
+    //     left: 100 * rpx,
+    //     child: );
+
+    return InkWell(
+      onTap: () {
+        provider.setHeroTag(tag, context);
+      },
+      child: Hero(
+        tag: tag,
+        child: Container(
+          width: 550 * rpx,
           height: 150 * rpx,
           padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
           margin: EdgeInsets.only(top: 40 * rpx),
@@ -281,7 +371,8 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
                       child: Text(
                         subTitle,
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.8), fontSize: 13),
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 13),
                       ),
                     )
                   ],
@@ -289,6 +380,7 @@ class _UploadBtnAnimateState extends State<UploadBtnAnimate>
               ),
             ],
           ),
-        ));
+        ),
+      ),);
   }
 }

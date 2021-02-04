@@ -22,12 +22,10 @@ class FaceCameraMain extends StatefulWidget {
   const FaceCameraMain(
       {Key key,
       @required this.size,
-      @required this.rpx,
-      @required this.provider})
+      @required this.rpx})
       : super(key: key);
   final Size size;
   final double rpx;
-  final FaceCameraProvider provider;
 
   @override
   _FaceCameraMainState createState() => _FaceCameraMainState();
@@ -78,10 +76,9 @@ class _FaceCameraMainState extends State<FaceCameraMain> {
     super.initState();
     size = widget.size;
     rpx = widget.rpx;
-    provider = widget.provider;
 
     requestPermissions();
-    startTimer();
+    // startTimer();
 
     stickerList = ["haru", "rize", "sakura", "hosh", "higu", "mito"];
 
