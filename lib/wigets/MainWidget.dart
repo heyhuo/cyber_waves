@@ -66,7 +66,7 @@ class _UserContentItemState extends State<UserContentItem> {
       return Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage("assets/images/bg3.jpg"), fit: BoxFit.fill)),
+                image: AssetImage("assets/gif/g1.gif"), fit: BoxFit.fill)),
         width: 750 * rpx,
         child: Container(
           color: Colors.black.withOpacity(0.7),
@@ -82,7 +82,9 @@ class _UserContentItemState extends State<UserContentItem> {
                 // color: Colors.brown,
                 margin: EdgeInsets.all(10),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    /*用户名*/
                     Column(
                       children: [
                         Row(
@@ -99,6 +101,7 @@ class _UserContentItemState extends State<UserContentItem> {
                         ),
                       ],
                     ),
+                    /*标签*/
                     Container(
                       child: Row(
                         children: [
@@ -107,6 +110,7 @@ class _UserContentItemState extends State<UserContentItem> {
                         ],
                       ),
                     ),
+                    /*内容*/
                     Container(
                         width: 600 * rpx,
                         color: Colors.red,
@@ -119,12 +123,8 @@ class _UserContentItemState extends State<UserContentItem> {
                               overflow: TextOverflow.ellipsis,
                               maxLines: 5,
                             ))),
-                    Container(
-                      margin: EdgeInsets.only(top: 10),
-                      height: 600 * rpx,
-                      color: Colors.yellow,
-                      child: isVedio ? Text("") : _getUserGridViewPics(),
-                    ),
+                    /*网格图片*/
+                    _getUserGridViewPics(),
                   ],
                 ),
               )
@@ -163,12 +163,9 @@ class _UserContentItemState extends State<UserContentItem> {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
           color: Colors.blue,
-          image: DecorationImage(
-              image: AssetImage("assets/images/bg1.jpg"),
-              scale: 0.1,
-              fit: BoxFit.fitWidth)),
-      height: 100 * rpx,
-      width: 100*rpx,
+          ),
+      // height:10 * rpx,
+      // width: 10*rpx,
     );
   }
 
@@ -193,19 +190,24 @@ class _UserContentItemState extends State<UserContentItem> {
   /* 获取网格图片组件 */
   Widget _getUserGridViewPics() {
     return GridView.count(
-      physics: NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      //水平子Widget之间间距
-      crossAxisSpacing: 5.0,
-      //垂直子Widget之间间距
-      mainAxisSpacing: 5.0,
-      // childAspectRatio: 1.0,
-      children: [
-        _getGridPic(),
-        _getGridPic(),
-        _getGridPic(),
-        _getGridPic(),
-      ],
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        crossAxisCount: 3,
+        childAspectRatio: 1,
+        //水平子Widget之间间距
+        crossAxisSpacing: 5.0,
+        //垂直子Widget之间间距
+        mainAxisSpacing: 5.0,
+        // childAspectRatio: 1.0,
+        children: [
+          _getGridPic(),
+          _getGridPic(),
+          _getGridPic(),
+          _getGridPic(),
+          _getGridPic(),
+          _getGridPic(),
+          _getGridPic(),
+        ],
     );
   }
 

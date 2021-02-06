@@ -270,7 +270,7 @@ class _UploadAnimateBtnState extends State<UploadAnimateBtn>
   Widget build(BuildContext context) {
     provider = Provider.of<UploadBtnProvider>(context);
     return Positioned(
-      bottom: 0,//-MediaQuery.of(context).size.height * _animation.value,
+      bottom: 0, //-MediaQuery.of(context).size.height * _animation.value,
       child: Container(
         width: 750 * rpx,
         height: MediaQuery.of(context).size.height,
@@ -281,14 +281,16 @@ class _UploadAnimateBtnState extends State<UploadAnimateBtn>
           child: Stack(
             children: [
               Positioned(
-                left: 100*rpx,
-                bottom:(-MediaQuery.of(context).size.height/2) * _animation.value +300*rpx,
+                left: 100 * rpx,
+                bottom: (-MediaQuery.of(context).size.height / 2) *
+                        _animation.value +
+                    300 * rpx,
                 child: Column(
                   children: [
                     _getUploadBtn(rpx, 650 * rpx, Colors.green.shade600,
                         Icons.account_box, "贴纸", "sticker", "直接使用就完事了~"),
-                    _getUploadBtn(rpx, 480 * rpx, Colors.orange.shade600, Icons.photo,
-                        "图片", "picture", "分享心爱的图片💖~"),
+                    _getUploadBtn(rpx, 480 * rpx, Colors.orange.shade600,
+                        Icons.photo, "图片", "picture", "分享心爱的图片💖~"),
                     _getUploadBtn(rpx, 310 * rpx, Colors.blue.shade600,
                         Icons.video_library, "视频", "video", "发布有趣的视频📹~"),
                   ],
@@ -332,55 +334,52 @@ class _UploadAnimateBtnState extends State<UploadAnimateBtn>
       onTap: () {
         provider.setHeroTag(tag, context);
       },
-      child: Hero(
-        tag: tag,
-        child: Container(
-          width: 550 * rpx,
-          height: 150 * rpx,
-          padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
-          margin: EdgeInsets.only(top: 40 * rpx),
-          decoration: BoxDecoration(
-              color: color, borderRadius: BorderRadius.circular(20.0)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 50.0,
-              ),
-              Container(
-                width: txtWidth,
-                // color: Colors.yellow,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: txtWidth,
-                      // color: Colors.yellow,
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
-                      ),
+      child: Container(
+        width: 550 * rpx,
+        height: 150 * rpx,
+        padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
+        margin: EdgeInsets.only(top: 40 * rpx),
+        decoration: BoxDecoration(
+            color: color, borderRadius: BorderRadius.circular(20.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 50.0,
+            ),
+            Container(
+              width: txtWidth,
+              // color: Colors.yellow,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: txtWidth,
+                    // color: Colors.yellow,
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
                     ),
-                    Container(
-                      width: txtWidth,
-                      child: Text(
-                        subTitle,
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 13),
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                  Container(
+                    width: txtWidth,
+                    child: Text(
+                      subTitle,
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.8), fontSize: 13),
+                    ),
+                  )
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),);
+      ),
+    );
   }
 }

@@ -121,21 +121,25 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
                   bottom: 0,
                   left: 160 * rpx,
                   child: Container(
-                    width: 200 * rpx * 2,
-                    height: 200 * rpx * 2,
+                    width: 400 * rpx,
+                    height: 400 * rpx,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Colors.redAccent.withOpacity(0.5),
+                            width: 3)),
                     child: imagePath == null
                         ? Center(
-                            child: Container(
-                            child: Text("左下角选个形象吧~"),
+                            child: CustomPaint(
+                            size: Size(400 * rpx, 400 * rpx),
+                            painter: ImageCropPainter(rpx),
                           ))
-                        : /*(faces == null || faces.length == 0)
-                            ? Image.asset(imagePath)
-                            : _setVp(),*/
-                    ImagesAnimation(
-                          w: 100,
-                          h: 100,
-                          entry: ImagesAnimationEntry(0, 4,
-                              "assets/poser_img/$imageName/$imageName-%s-0-4.png"))
+                        : _setVp(),
+                    /*ImagesAnimation(
+                            w: 100,
+                            h: 100,
+                            entry: ImagesAnimationEntry(0, 4,
+                                "assets/poser_img/$imageName/$imageName-%s-0-4.png"),
+                          ),*/
                   ),
                 ),
               ],
@@ -237,54 +241,57 @@ class _WaifuAnimateState extends State<WaifuAnimate> {
     var leftIdx = 0;
     var mouthIdx = 0;
 
-    Face face = faces.first;
+    if (faces != null && faces.length > 0) {
+      Face face = faces.first;
 
-    final List<Offset> leftEye =
-        face.getContour(FaceContourType.leftEye).positionsList;
+      final List<Offset> leftEye =
+          face.getContour(FaceContourType.leftEye).positionsList;
 
-    final List<Offset> rightEye =
-        face.getContour(FaceContourType.rightEye).positionsList;
+      final List<Offset> rightEye =
+          face.getContour(FaceContourType.rightEye).positionsList;
 
-    final List<Offset> lowerLipTop =
-        face.getContour(FaceContourType.lowerLipTop).positionsList;
-    final List<Offset> upperLipBottom =
-        face.getContour(FaceContourType.upperLipBottom).positionsList;
+      final List<Offset> lowerLipTop =
+          face.getContour(FaceContourType.lowerLipTop).positionsList;
+      final List<Offset> upperLipBottom =
+          face.getContour(FaceContourType.upperLipBottom).positionsList;
 
-    final List<Offset> facePoints =
-        face.getContour(FaceContourType.face).positionsList;
+      final List<Offset> facePoints =
+          face.getContour(FaceContourType.face).positionsList;
 
-    // facePoints.length/2;
+      // facePoints.length/2;
 
-    /*
+      /*
     * 眼睛纵横比  EAR = ||p3-p13|| + ||p4-p12|| / 2 * ||p0-p8||
     * 人眼纵横比阈值 0.3
     * 嘴巴纵横比：MAR =  (||lt4-ub4||+||lt5-ub5||)/(||lt0-lt8||+||ub0-ub8||)
     * */
 
-    var EARThresh = 0.3;
+      var EARThresh = 0.3;
 
-    var leftEAR = _getEAR(leftEye);
-    var rightEAR = _getEAR(rightEye);
+      var leftEAR = _getEAR(leftEye);
+      var rightEAR = _getEAR(rightEye);
 
-    var MAR = (_EuclideanDist(lowerLipTop[4], upperLipBottom[4]) +
-            _EuclideanDist(lowerLipTop[5], upperLipBottom[5])) /
-        (_EuclideanDist(lowerLipTop[0], lowerLipTop[8]) +
-            _EuclideanDist(upperLipBottom[0], upperLipBottom[8]));
+      var MAR = (_EuclideanDist(lowerLipTop[4], upperLipBottom[4]) +
+              _EuclideanDist(lowerLipTop[5], upperLipBottom[5])) /
+          (_EuclideanDist(lowerLipTop[0], lowerLipTop[8]) +
+              _EuclideanDist(upperLipBottom[0], upperLipBottom[8]));
 
-    mouthIdx = _getMouthIdx(MAR);
-    leftIdx = _getEyeIdx(EARThresh, leftEAR);
-    rightIdx = _getEyeIdx(EARThresh, rightEAR);
-
-    print(
-        "MAR:${MAR}-${mouthIdx};left EAR:${0.3 - leftEAR}；leftCloseRate：${leftIdx}；rightCloseRate：${rightIdx}");
-
-    // print("face len:${facePoints[0].dy - facePoints[18].dy}；"
-    //     "left eye:${leftEyebrowBottom.first.dy - leftEyebrowTop.first.dy}");
-
+      mouthIdx = _getMouthIdx(MAR);
+      leftIdx = _getEyeIdx(EARThresh, leftEAR);
+      rightIdx = _getEyeIdx(EARThresh, rightEAR);
+      print(
+          "MAR:${MAR}-${mouthIdx};left EAR:${0.3 - leftEAR}；leftCloseRate：${leftIdx}；rightCloseRate：${rightIdx}");
+      // print("face len:${facePoints[0].dy - facePoints[18].dy}；"
+      //     "left eye:${leftEyebrowBottom.first.dy - leftEyebrowTop.first.dy}");
+    }
     var imgName =
         "assets/poser_img/$imageName/$imageName-${rightIdx}-${leftIdx}-${mouthIdx}.png";
 
-    return Image.asset(imgName);
+    return Stack(children: [
+      Image.asset(imgName),
+      CustomPaint(
+          size: Size(400 * rpx, 400 * rpx), painter: ImageCropPainter(rpx)),
+    ]);
   }
 }
 
@@ -342,4 +349,40 @@ class ImagesAnimationEntry {
   String basePath;
 
   ImagesAnimationEntry(this.lowIndex, this.highIndex, this.basePath);
+}
+
+class ImageCropPainter extends CustomPainter {
+  final double rpx;
+
+  ImageCropPainter(this.rpx);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+    //画背景
+    var paint = Paint()
+      ..isAntiAlias = false
+      ..strokeWidth = 2.0
+      ..color = Colors.green.withOpacity(0.5);
+
+    var paint1 = Paint()
+      ..isAntiAlias = false
+      ..strokeWidth = 2.0
+      ..color = Colors.blue.withOpacity(0.5);
+
+    var l1_dy = (size.height / 4.1);
+    var l2_dy = (size.height / 4.1) * 3;
+    var l12_dx = size.width;
+    var l3_dx = size.width / 2;
+
+    canvas.drawLine(
+        Offset(0.0, l1_dy), Offset(l12_dx, l1_dy), paint..strokeCap);
+    canvas.drawLine(
+        Offset(0.0, l2_dy), Offset(l12_dx, l2_dy), paint..strokeCap);
+    canvas.drawLine(
+        Offset(l3_dx, 0.0), Offset(l3_dx, size.height), paint1..strokeCap);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

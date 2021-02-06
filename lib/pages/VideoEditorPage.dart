@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_editor/video_editor.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
+import 'VideoUploadPage.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -102,6 +104,7 @@ class _VideoEditorState extends State<VideoEditor> {
     if (file != null) {
       //GallerySaver.saveImage() for GIF or GallerySaver.saveVideo() for VIDEOS
       //Note: GallerySave dont override files.
+
       await GallerySaver.saveVideo(file.path, albumName: "Video Editor");
       _exportText = "Video success export!";
     } else {
@@ -121,38 +124,38 @@ class _VideoEditorState extends State<VideoEditor> {
       backgroundColor: Colors.black,
       body: _controller.initialized
           ? AnimatedBuilder(
-          animation: _controller,
-          builder: (_, __) {
-            return Stack(children: [
-              Column(children: [
-                _topNavBar(),
-                Expanded(
-                  child: ClipRRect(
-                    child: CropGridViewer(
-                      controller: _controller,
-                      showGrid: false,
+              animation: _controller,
+              builder: (_, __) {
+                return Stack(children: [
+                  Column(children: [
+                    _topNavBar(),
+                    Expanded(
+                      child: ClipRRect(
+                        child: CropGridViewer(
+                          controller: _controller,
+                          showGrid: false,
+                        ),
+                      ),
+                    ),
+                    ..._trimSlider(),
+                  ]),
+                  Center(
+                    child: OpacityTransition(
+                      visible: !_controller.isPlaying,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.play_arrow),
+                      ),
                     ),
                   ),
-                ),
-                ..._trimSlider(),
-              ]),
-              Center(
-                child: OpacityTransition(
-                  visible: !_controller.isPlaying,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.play_arrow),
-                  ),
-                ),
-              ),
-              _customSnackBar(),
-            ]);
-          })
+                  _customSnackBar(),
+                ]);
+              })
           : Center(child: CircularProgressIndicator()),
     );
   }
@@ -187,6 +190,17 @@ class _VideoEditorState extends State<VideoEditor> {
                 child: Icon(Icons.save, color: Colors.white),
               ),
             ),
+            Expanded(
+                child: GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => VideoUploadPage()));
+              },
+              child: Icon(
+                Icons.forward,
+                color: Colors.white,
+              ),
+            ))
           ],
         ),
       ),
@@ -201,8 +215,8 @@ class _VideoEditorState extends State<VideoEditor> {
 
     String formatter(Duration duration) =>
         duration.inMinutes.remainder(60).toString().padLeft(2, '0') +
-            ":" +
-            (duration.inSeconds.remainder(60)).toString().padLeft(2, '0');
+        ":" +
+        (duration.inSeconds.remainder(60)).toString().padLeft(2, '0');
 
     return [
       Padding(

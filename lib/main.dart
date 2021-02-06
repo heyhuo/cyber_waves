@@ -54,16 +54,14 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         // primaryColorDark: Color(0xff566C73),  //綪御纳户
-        primaryColorDark: Color(0xffffffff), //綪御纳户566C73
+        primaryColorDark: Color(0xff3d6263), //綪御纳户566C73
         primaryColorLight: Color(0xff78C2C4),
-        primaryColor: Color(0xff3d6263),
+        primaryColor: Color(0xffffffff),
       ),
       home: MyHomePage(),
     );
   }
 }
-
-
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key}) : super(key: key);
@@ -76,7 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
   var list = new List<String>();
   double rpx;
   bool uploadBtnVisible = false;
-
 
   @override
   void initState() {
@@ -95,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: MultiProvider(
           providers: [
             ChangeNotifierProvider(
-                create: (context) => UploadBtnProvider(false,""))
+                create: (context) => UploadBtnProvider(false, ""))
           ],
           child: Stack(
             children: [
