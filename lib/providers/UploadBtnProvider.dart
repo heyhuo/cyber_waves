@@ -37,7 +37,15 @@ class UploadBtnProvider extends ChangeNotifier {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(
-                create: (_) => EditContentProvider())
+                create: (_) => EditContentProvider([ "assets/gif/g1.gif",
+                      "assets/gif/sakura_all.gif",
+                      "assets/gif/haru_all.gif",
+                      "assets/gif/hosh_all.gif",
+                      "assets/gif/g2.gif",
+                      "assets/gif/higu_all.gif",
+                      "assets/gif/mito_all.gif",
+                      "assets/gif/rize_all.gif"
+                    ]))
           ],
           child: VideoUploadPage(),
         );

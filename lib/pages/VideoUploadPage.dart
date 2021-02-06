@@ -60,6 +60,7 @@ class _VideoUploadState extends State<VideoUpload> {
     screenHeight = MediaQuery.of(context).size.height;
     picList = provider.picList;
 
+
     return Stack(
       children: [
         /*背景图*/

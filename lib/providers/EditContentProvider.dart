@@ -12,7 +12,7 @@ class EditContentProvider extends ChangeNotifier {
   bool musicField=false;
   Color tagColor = Colors.white;
 
-  EditContentProvider();
+  EditContentProvider(this.picList);
 
   addTag(Widget tag) {
     tagList.add(tag);
