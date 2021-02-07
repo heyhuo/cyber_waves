@@ -55,22 +55,21 @@ class _GeneratorState extends State<Generator> {
         children: [
           Container(
               width: 750 * widget.rpx,
-              height: 750 * widget.rpx,
+              height: 1500 * widget.rpx,
               // color: Colors.black,
               child: Stack(
                 children: [
-                  imgBytes == null
-                      ? Container(
-                          width: 300,
-                          height: 300,
-                          color: Colors.greenAccent,
-                        )
-                      : Center(
-                          child: Container(
-                              width: 400 * widget.rpx,
-                              height: 400 * widget.rpx,
-                              child: Image.memory(imgBytes)),
-                        ),
+                  Center(
+                    child: Container(
+                        margin: EdgeInsets.only(top: 100 * widget.rpx),
+                        width: 400 * widget.rpx,
+                        height: 1500 * widget.rpx,
+                        child: SingleChildScrollView(
+                          child: ShowGenerate(
+                            rpx: widget.rpx,
+                          ),
+                        )),
+                  ),
                   Positioned(
                       bottom: 0,
                       left: 100 * widget.rpx,
@@ -125,47 +124,46 @@ class _GeneratorState extends State<Generator> {
 
     // 加载张量
     _interpreter.allocateTensors();
-    // 打印 input tensor 列表
+    /*// 打印 input tensor 列表
     print(_interpreter.getInputTensors());
     // 打印 output tensor 列表
-    print(_interpreter.getOutputTensors());
+    print(_interpreter.getOutputTensors());*/
 
     var name = "assets/waifus/higu-0-0-0.png";
-    var bytes = await new FileUtil().loadFileAsBytes(name);
 
     var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
     img.Image oriImage = img.decodePng(imageBytes);
     //这个裁剪对画质有影响
-    img.Image resizedImage = img.copyResize(oriImage, height: 256, width: 256);
+    // img.Image resizedImage = img.copyResize(oriImage, height: 256, width: 256);
 
-    var imgBytes =
-        imageToByteListFloat32(oriImage).reshape([1, 4, 256, 256]);
-
-    // provider.setImage(DecodeBitmapToImage(imgBytes));
+    var imgBytes = imageToByteListFloat32(oriImage).reshape([1, 4, 256, 256]);
 
     var totalTime = 0.0;
-    var outImageBytesList=[];
-    for (var i = 0; i < 1; i++) {
-      var morParam = [0.3, i / 10, 0.5].reshape([1, 3]);
+    var outImageBytesList = [];
+    for (var i = 0; i < 10; i++) {
+      var morParam = [i / 10, i / 10, 0.5].reshape([1, 3]);
       var inputs = [imgBytes, morParam];
       var output0 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
       var output1 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
       var outputs = {0: output0, 1: output1};
       int startTime = new DateTime.now().millisecondsSinceEpoch;
-      _interpreter.runForMultipleInputs(inputs, outputs);
+      await _interpreter.runForMultipleInputs(inputs, outputs);
       // provider.setImage(DecodeBitmapToImage(outputs[0], true));
       int endTime = new DateTime.now().millisecondsSinceEpoch;
       var takeTime = (endTime - startTime) / 1000;
       totalTime += takeTime;
       print("Inference times:${i},took ${takeTime}s,totalTime:${totalTime}s");
-      outImageBytesList.add(output0);
+      // outImageBytesList.add(outputs[0]);
+      provider.addOutImage(output0);
     }
     _interpreter.close();
-    for (var i = 0; i < outImageBytesList.length; i++) {
-      var o = outImageBytesList[i];
-      provider.setImage(DecodeBitmapToImage(o, true));
-    }
 
+    // provider.addOutImage(outImageBytesList);
+
+    // for (var i = 0; i < outImageBytesList.length; i++) {
+    //   var o = outImageBytesList[i];
+    //   provider.setImage(DecodeBitmapToImage(o, true));
+    // }
   }
 
   Float32List imageToByteListFloat32(
@@ -214,27 +212,39 @@ class _GeneratorState extends State<Generator> {
 
     return p;
   }
+}
 
-  int linearToSrgb(pixel, bool isAlpha) {
-    var x = pixel;
-    if (!isAlpha) x = (x + 1.0) * 0.5;
+class ShowGenerate extends StatelessWidget {
+  const ShowGenerate({Key key, this.rpx}) : super(key: key);
+  final rpx;
 
-    if (x < 0.0)
-      x = 0;
-    else if (x > 1.0) x = 1.0;
+  @override
+  Widget build(BuildContext context) {
+    GeneratorProvider provider = Provider.of<GeneratorProvider>(context);
+    var outList = provider.outImageBytesList;
+    return Column(
+      children: List.generate(
+          outList.length,
+          (index) => Container(
+              margin: EdgeInsets.only(top: 30 * rpx),
+              child: DecodeBitmapToImage(
+                  imgBytes: outList[index], isReshape: true))),
+    );
+  }
+}
 
-    if (!isAlpha) {
-      if (x <= 0.003130804953560372) {
-        x *= 12.92;
-      } else {
-        x = 1.055 * pow(x, 1.0 / 2.4) - 0.055;
-      }
-    }
+class DecodeBitmapToImage extends StatelessWidget {
+  const DecodeBitmapToImage({Key key, this.imgBytes, this.isReshape})
+      : super(key: key);
+  final imgBytes;
+  final isReshape;
 
-    return (x * 255.0).toInt();
+  @override
+  Widget build(BuildContext context) {
+    return Image.memory(_decodeBitmap());
   }
 
-  Uint8List DecodeBitmapToImage(imgBytes, bool isReshape) {
+  Uint8List _decodeBitmap() {
     var inputSize = 256;
     var len = inputSize * inputSize;
     var convertedBytes = Uint8List(1 * inputSize * inputSize * 4);
@@ -271,7 +281,25 @@ class _GeneratorState extends State<Generator> {
 
     Bitmap bitmap = Bitmap.fromHeadless(256, 256, buffer.buffer.asUint8List());
     Uint8List headedBitmap = bitmap.buildHeaded();
-
     return headedBitmap;
+  }
+
+  int linearToSrgb(pixel, bool isAlpha) {
+    var x = pixel;
+    if (!isAlpha) x = (x + 1.0) * 0.5;
+
+    if (x < 0.0)
+      x = 0;
+    else if (x > 1.0) x = 1.0;
+
+    if (!isAlpha) {
+      if (x <= 0.003130804953560372) {
+        x *= 12.92;
+      } else {
+        x = 1.055 * pow(x, 1.0 / 2.4) - 0.055;
+      }
+    }
+
+    return (x * 255.0).toInt();
   }
 }
