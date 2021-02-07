@@ -10,6 +10,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:bitmap/bitmap.dart';
+import 'dart:convert' as convert;
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 class GeneratorPage extends StatefulWidget {
@@ -38,14 +39,14 @@ class Generator extends StatefulWidget {
 
 class _GeneratorState extends State<Generator> {
   GeneratorProvider provider;
-  var imgBytes;
+  var imgBytesList;
 
   // Status status;
 
   @override
   Widget build(BuildContext context) {
     provider = Provider.of<GeneratorProvider>(context);
-    imgBytes = provider.imageBytes;
+    imgBytesList = provider.imageBytesList;
 
     return Container(
       width: 750 * widget.rpx,
@@ -73,21 +74,39 @@ class _GeneratorState extends State<Generator> {
                   Positioned(
                       bottom: 0,
                       left: 100 * widget.rpx,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.check_circle_outline,
-                          color: Colors.white,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        // color: Colors.yellow,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                          onPressed: () {
+                            _loadModel(false);
+                          },
                         ),
-                        onPressed: () {
-                          _loadModel(false);
-                        },
-                      ) /*Container(
-                      width: 100 * widget.rpx,
-                      height: 100 * widget.rpx,
-                      color: Colors.yellow,
-                      child:
-                    ),*/
-                      )
+                      )),
+                  Positioned(
+                      bottom: 0,
+                      right: 200 * widget.rpx,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        // color: Colors.yellow,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.emoji_emotions_sharp,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                          onPressed: () {
+                            provider.readFile("higu");
+                          },
+                        ),
+                      ))
                 ],
               ))
         ],
@@ -149,17 +168,17 @@ class _GeneratorState extends State<Generator> {
       var outputs = {0: output0, 1: output1};
       int startTime = new DateTime.now().millisecondsSinceEpoch;
       await _interpreter.runForMultipleInputs(inputs, outputs);
-      // provider.setImage(DecodeBitmapToImage(outputs[0], true));
       int endTime = new DateTime.now().millisecondsSinceEpoch;
       var takeTime = (endTime - startTime) / 1000;
       totalTime += takeTime;
       print("Inference times:${i},took ${takeTime}s,totalTime:${totalTime}s");
       // outImageBytesList.add(outputs[0]);
-      provider.addOutImage(output0);
+      // provider.addOutImage(output0);
+      provider.addJsonStr(morParam[0], output0);
     }
     _interpreter.close();
 
-    // provider.addOutImage(outImageBytesList);
+    provider.writeFile("higu");
 
     // for (var i = 0; i < outImageBytesList.length; i++) {
     //   var o = outImageBytesList[i];
@@ -222,85 +241,15 @@ class ShowGenerate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     GeneratorProvider provider = Provider.of<GeneratorProvider>(context);
-    var outList = provider.outImageBytesList;
+    var outList = provider.imageBytesList;
+    var len = outList.length;
     return Column(
-      children: List.generate(
-          outList.length,
-          (index) => Container(
-              margin: EdgeInsets.only(top: 30 * rpx),
-              child: DecodeBitmapToImage(
-                  imgBytes: outList[index], isReshape: true))),
+      children: List.generate(len, (index) {
+        Uint8List list =
+            Uint8List.fromList(outList[index]["bitmap"].cast<int>());
+        return Container(
+            margin: EdgeInsets.only(top: 30 * rpx), child: Image.memory(list));
+      }),
     );
-  }
-}
-
-class DecodeBitmapToImage extends StatelessWidget {
-  const DecodeBitmapToImage({Key key, this.imgBytes, this.isReshape})
-      : super(key: key);
-  final imgBytes;
-  final isReshape;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.memory(_decodeBitmap());
-  }
-
-  Uint8List _decodeBitmap() {
-    var inputSize = 256;
-    var len = inputSize * inputSize;
-    var convertedBytes = Uint8List(1 * inputSize * inputSize * 4);
-    var buffer = Uint8List.view(convertedBytes.buffer);
-    int pixelIndex = 0;
-    int idx = 0;
-
-    for (var i = 0; i < inputSize; i++) {
-      for (var j = 0; j < inputSize; j++) {
-        var r, g, b, a;
-        if (!isReshape) {
-          r = imgBytes[pixelIndex];
-          g = imgBytes[len + pixelIndex];
-          b = imgBytes[len * 2 + pixelIndex];
-          a = imgBytes[len * 3 + pixelIndex];
-          pixelIndex++;
-        } else {
-          r = imgBytes[0][0][i][j];
-          g = imgBytes[0][1][i][j];
-          b = imgBytes[0][2][i][j];
-          a = imgBytes[0][3][i][j];
-        }
-        var red = linearToSrgb(r, false);
-        var green = linearToSrgb(g, false);
-        var blue = linearToSrgb(b, false);
-        var alpha = linearToSrgb(a, true);
-
-        buffer[idx++] = red;
-        buffer[idx++] = green;
-        buffer[idx++] = blue;
-        buffer[idx++] = alpha;
-      }
-    }
-
-    Bitmap bitmap = Bitmap.fromHeadless(256, 256, buffer.buffer.asUint8List());
-    Uint8List headedBitmap = bitmap.buildHeaded();
-    return headedBitmap;
-  }
-
-  int linearToSrgb(pixel, bool isAlpha) {
-    var x = pixel;
-    if (!isAlpha) x = (x + 1.0) * 0.5;
-
-    if (x < 0.0)
-      x = 0;
-    else if (x > 1.0) x = 1.0;
-
-    if (!isAlpha) {
-      if (x <= 0.003130804953560372) {
-        x *= 12.92;
-      } else {
-        x = 1.055 * pow(x, 1.0 / 2.4) - 0.055;
-      }
-    }
-
-    return (x * 255.0).toInt();
   }
 }

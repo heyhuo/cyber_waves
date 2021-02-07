@@ -60,7 +60,7 @@ dependencies:
   video_thumbnail: ^0.2.5
   video_editor: ^1.0.2
   animations: ^1.1.2
-
+  convert: ^2.1.1
 
   #  screen_recorder_flutter: ^0.0.1
   # The following adds the Cupertino Icons font to your application.
