@@ -40,6 +40,8 @@ class _GeneratorState extends State<Generator> {
   GeneratorProvider provider;
   var imgBytes;
 
+  // Status status;
+
   @override
   Widget build(BuildContext context) {
     provider = Provider.of<GeneratorProvider>(context);
@@ -112,8 +114,11 @@ class _GeneratorState extends State<Generator> {
       _interpreter =
           await Interpreter.fromAsset(_modelFile, options: interpreterOptions);
     } else {
-      // var interpreterOptions = InterpreterOptions()..useNnApiForAndroid = true;
-      _interpreter = await Interpreter.fromAsset(_modelFile);
+      var interpreterOptions = InterpreterOptions()
+        // ..useNnApiForAndroid = true
+        ..threads = 4;
+      _interpreter =
+          await Interpreter.fromAsset(_modelFile, options: interpreterOptions);
     }
 
     print('Interpreter loaded successfully');
@@ -130,35 +135,38 @@ class _GeneratorState extends State<Generator> {
 
     var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
     img.Image oriImage = img.decodePng(imageBytes);
+    //这个裁剪对画质有影响
     img.Image resizedImage = img.copyResize(oriImage, height: 256, width: 256);
 
     var imgBytes =
-        imageToByteListFloat32(resizedImage).reshape([1, 4, 256, 256]);
+        imageToByteListFloat32(oriImage).reshape([1, 4, 256, 256]);
 
     // provider.setImage(DecodeBitmapToImage(imgBytes));
 
-    var morParam = [0.0, 1.0, 0.5].reshape([1, 3]);
+    var totalTime = 0.0;
+    var outImageBytesList=[];
+    for (var i = 0; i < 1; i++) {
+      var morParam = [0.3, i / 10, 0.5].reshape([1, 3]);
+      var inputs = [imgBytes, morParam];
+      var output0 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
+      var output1 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
+      var outputs = {0: output0, 1: output1};
+      int startTime = new DateTime.now().millisecondsSinceEpoch;
+      _interpreter.runForMultipleInputs(inputs, outputs);
+      // provider.setImage(DecodeBitmapToImage(outputs[0], true));
+      int endTime = new DateTime.now().millisecondsSinceEpoch;
+      var takeTime = (endTime - startTime) / 1000;
+      totalTime += takeTime;
+      print("Inference times:${i},took ${takeTime}s,totalTime:${totalTime}s");
+      outImageBytesList.add(output0);
+    }
+    _interpreter.close();
+    for (var i = 0; i < outImageBytesList.length; i++) {
+      var o = outImageBytesList[i];
+      provider.setImage(DecodeBitmapToImage(o, true));
+    }
 
-    // input: List<Object>
-    var inputs = [imgBytes, morParam];
-
-    var output0 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
-    var output1 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
-    // output: Map<int, Object>
-    var outputs = {0: output0, 1: output1};
-
-    // for (var i = 0; i < 10; i++) {
-    int startTime = new DateTime.now().millisecondsSinceEpoch;
-    // inference
-    _interpreter.runForMultipleInputs(inputs, outputs);
-    int endTime = new DateTime.now().millisecondsSinceEpoch;
-    print("Inference took ${(endTime - startTime) / 1000}s");
-    // print outputs
-    provider.setImage(DecodeBitmapToImage(outputs[0], true));
-    print(outputs);
   }
-
-// print(imageBytes);
 
   Float32List imageToByteListFloat32(
     img.Image image,
@@ -183,16 +191,12 @@ class _GeneratorState extends State<Generator> {
         buffer[len * 2 + pixelIndex] = blue;
         buffer[len * 3 + pixelIndex] = alpha;
         pixelIndex++;
-        /*buffer[pixelIndex++] = red;
-        buffer[pixelIndex++] = green;
-        buffer[pixelIndex++] = blue;
-        buffer[pixelIndex++] = alpha;*/
       }
     }
     return buffer.buffer.asFloat32List();
   }
 
-  srgbToLinear(int pixel, bool isAlpha) {
+  double srgbToLinear(int pixel, bool isAlpha) {
     var p = pixel / 255.0;
 
     if (p < 0.0)
@@ -231,7 +235,6 @@ class _GeneratorState extends State<Generator> {
   }
 
   Uint8List DecodeBitmapToImage(imgBytes, bool isReshape) {
-    // bitmap.
     var inputSize = 256;
     var len = inputSize * inputSize;
     var convertedBytes = Uint8List(1 * inputSize * inputSize * 4);
