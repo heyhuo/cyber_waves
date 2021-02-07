@@ -8,9 +8,7 @@ import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/BottomBar.dart';
 import 'package:cyber_waves/wigets/MainWidget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
+
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:tflite_flutter/tflite_flutter.dart';

@@ -29,6 +29,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.5.0-nullsafety.1"
+  bitmap:
+    dependency: "direct main"
+    description:
+      name: bitmap
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.6"
   boolean_selector:
     dependency: transitive
     description:

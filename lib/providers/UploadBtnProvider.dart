@@ -1,6 +1,8 @@
+import 'package:cyber_waves/pages/GeneratorPage.dart';
 import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/pages/VideoUploadPage.dart';
 import 'package:cyber_waves/providers/EditContentProvider.dart';
+import 'package:cyber_waves/providers/GeneratorProvider.dart';
 import 'package:cyber_waves/wigets/MakerMain.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +39,8 @@ class UploadBtnProvider extends ChangeNotifier {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(
-                create: (_) => EditContentProvider([ "assets/gif/g1.gif",
+                create: (_) => EditContentProvider([
+                      "assets/gif/g1.gif",
                       "assets/gif/sakura_all.gif",
                       "assets/gif/haru_all.gif",
                       "assets/gif/hosh_all.gif",
@@ -50,6 +53,16 @@ class UploadBtnProvider extends ChangeNotifier {
           child: VideoUploadPage(),
         );
       }));
+    } else if ("video" == tag) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) {
+                return MultiProvider(providers: [
+                  ChangeNotifierProvider(create: (_) => GeneratorProvider()),
+                ], child: GeneratorPage());
+              },
+              fullscreenDialog: true));
     }
     notifyListeners();
   }
