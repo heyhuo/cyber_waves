@@ -136,6 +136,7 @@ class _GeneratorState extends State<Generator> {
     //这个裁剪对画质有影响
     // img.Image resizedImage = img.copyResize(oriImage, height: 256, width: 256);
 
+    // Bitmap.
     var imgBytes = imageToByteListFloat32(oriImage).reshape([1, 4, 256, 256]);
 
     var totalTime = 0.0;
