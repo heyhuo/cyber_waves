@@ -7,12 +7,18 @@ class EditContentProvider extends ChangeNotifier {
   var content;
   var picList = List<String>();
   var video;
+  var selPicIdx;
   bool tagTextField=false;
   bool friendsField=false;
   bool musicField=false;
   Color tagColor = Colors.white;
 
   EditContentProvider(this.picList);
+
+  setSelPicIdx(idx){
+    selPicIdx = idx;
+    notifyListeners();
+  }
 
   addTag(Widget tag) {
     tagList.add(tag);

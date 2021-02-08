@@ -13,7 +13,21 @@ class GeneratorProvider extends ChangeNotifier {
   var image;
   var imageBytesList = List();
   var jsonMap = {};
-  var imageName;
+  var fileName = "roa";
+  var imageName = "assets/waifus/roa.png";
+  int epcho = 10;
+  int selPicIdx;
+  var picList = [
+    "assets/waifus/higu.png",
+    "assets/waifus/roa.png",
+    "assets/waifus/rize.png",
+
+  ];
+
+  setSelPicIdx(idx){
+    selPicIdx = idx;
+    notifyListeners();
+  }
 
   setImage(_imageBytes) {
     imageBytes = _imageBytes;
@@ -25,12 +39,17 @@ class GeneratorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  removePic(index){
+    this.picList.removeAt(index);
+    notifyListeners();
+  }
+
   addJsonStr(params, bitmap) {
     var json = {
       'leftEye': params[0],
       'rightEye': params[1],
       'mouth': params[2],
-      'bitmap': DecodeBitmapToImage(bitmap).decodeBitmap(),
+      'bitmap': DecodeBitmapToImage(bitmap).decodeBitmap(isBuildToBitmap: true),
     };
     // String jsonStr = convert.jsonEncode(json);
     String key =
@@ -40,14 +59,16 @@ class GeneratorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  writeFile(imgName) {
+  writeFile(fileName) async {
     var str = convert.jsonEncode(this.jsonMap);
-    StorageBitmap().writeToFile(str, imgName, '$imgName.json');
+    StorageBitmap().writeToFile(str, fileName, '$fileName.json');
     notifyListeners();
   }
 
-  readFile(imgName) async {
-    String jsonStr = await StorageBitmap().readBitmap(imgName, '$imgName.json');
+  readFile(fileName) async {
+    imageBytesList.clear();
+    String jsonStr =
+        await StorageBitmap().readBitmap(fileName, '$fileName.json');
     Map<String, Object> map = convert.jsonDecode(jsonStr);
     map.forEach((key, value) {
       imageBytesList.add(value);
@@ -62,7 +83,7 @@ class DecodeBitmapToImage {
 
   DecodeBitmapToImage(this.imgBytes, {this.isReshape = true});
 
-  Uint8List decodeBitmap() {
+  Uint8List decodeBitmap({bool isBuildToBitmap = true}) {
     var inputSize = 256;
     var len = inputSize * inputSize;
     var convertedBytes = Uint8List(1 * inputSize * inputSize * 4);
@@ -97,7 +118,13 @@ class DecodeBitmapToImage {
       }
     }
 
-    Bitmap bitmap = Bitmap.fromHeadless(256, 256, buffer.buffer.asUint8List());
+    var list = buffer.buffer.asUint8List();
+
+    return isBuildToBitmap ? convertBitmap(list) : list;
+  }
+
+  convertBitmap(list, {inputSize = 256}) {
+    Bitmap bitmap = Bitmap.fromHeadless(inputSize, inputSize, list);
     Uint8List headedBitmap = bitmap.buildHeaded();
     return headedBitmap;
   }
@@ -149,12 +176,6 @@ class StorageBitmap {
   /*写入数据到文件内*/
   Future<File> writeToFile(json, fileDir, fileName) async {
     final jsonFile = await _localFile(fileDir, fileName);
-    // var jsonStr = await jsonFile.readAsString();
-    // var json = convert.jsonDecode(jsonStr);
-    // convert.
-    // print(json['name']); // xiaoming
-    // print(json['age']); // 22
-    // print(json['address']); // hangzhou
     return jsonFile.writeAsString(json);
   }
 

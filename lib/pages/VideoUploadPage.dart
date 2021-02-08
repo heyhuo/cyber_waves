@@ -60,7 +60,6 @@ class _VideoUploadState extends State<VideoUpload> {
     screenHeight = MediaQuery.of(context).size.height;
     picList = provider.picList;
 
-
     return Stack(
       children: [
         /*背景图*/
@@ -232,9 +231,10 @@ class _VideoUploadState extends State<VideoUpload> {
               ),
 
               /*图片栏*/
-              PictureList(
+              WrapPicList(
+                provider,
                 rpx: rpx,
-                picList: picList,
+                preview: true,
               ),
             ],
           ),
@@ -695,9 +695,79 @@ class _ContentFieldState extends State<ContentField> {
   }
 }
 
-class PictureList extends StatelessWidget {
-  const PictureList({Key key, this.rpx, this.picList}) : super(key: key);
+class WrapPicList extends StatefulWidget {
+  const WrapPicList(this.provider,
+      {Key key, @required this.rpx, this.maxSize = 9, this.preview})
+      : super(key: key);
   final double rpx;
+  final int maxSize;
+  final provider;
+  final preview;
+
+  @override
+  _WrapPicListState createState() => _WrapPicListState();
+}
+
+class _WrapPicListState extends State<WrapPicList> {
+  double rpx;
+  List<String> picList;
+  var provider;
+  int maxSize;
+  bool preview;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    rpx = widget.rpx;
+    maxSize = widget.maxSize;
+    provider = widget.provider;
+    preview = widget.preview;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    picList = widget.provider.picList;
+    return Container(
+      margin: EdgeInsets.only(top: 10 * rpx),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 5 * rpx, //主轴上子控件的间距
+        runSpacing: 2 * rpx, //交叉轴上子控件之间的间距
+        children: _pictures(), //要显示的子控件集合
+      ),
+    );
+  }
+
+  List<Widget> _pictures() {
+    var len = min(this.picList.length + 1, maxSize);
+    return List.generate(len, (index) {
+      if (this.picList.length < maxSize && index == len - 1) {
+        return Container(
+          width: 200 * rpx,
+          height: 200 * rpx,
+          margin: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20.0 * rpx)),
+          child: Icon(
+            Icons.add,
+            size: 80 * rpx,
+            color: Colors.white.withOpacity(0.5),
+          ),
+        );
+      } else {
+        return PicItem(provider, rpx: rpx, index: index, preview: preview);
+      }
+    });
+  }
+}
+
+/*class PictureList extends StatelessWidget {
+  const PictureList(this.provider, this.picList, {Key key, this.rpx})
+      : super(key: key);
+  final double rpx;
+  final provider;
   final List<String> picList;
 
   @override
@@ -731,41 +801,53 @@ class PictureList extends StatelessWidget {
           ),
         );
       } else {
-        return PicItem(rpx: rpx, index: index);
+        return PicItem(provider, rpx: rpx, index: index);
       }
     });
   }
-}
+}*/
 
 class PicItem extends StatelessWidget {
-  const PicItem({Key key, this.rpx, this.index}) : super(key: key);
+  const PicItem(this.provider,
+      {Key key, this.rpx, this.index, this.preview = true})
+      : super(key: key);
   final double rpx;
   final int index;
+  final provider;
+  final bool preview;
 
   @override
   Widget build(BuildContext context) {
-    EditContentProvider provider = Provider.of<EditContentProvider>(context);
+    // EditContentProvider provider = Provider.of<EditContentProvider>(context);
     var picList = provider.picList;
+    var selPicIdx = provider.selPicIdx;
     return Container(
         width: 220 * rpx,
         height: 220 * rpx,
         // padding: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
         decoration: BoxDecoration(
             // color: Colors.yellow,
+            border: Border.all(
+                style:
+                    selPicIdx != index ? BorderStyle.none : BorderStyle.solid,
+                width: 2,
+                color: Colors.greenAccent),
             borderRadius: BorderRadius.circular(20.0 * rpx)),
         child: Stack(
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        PicViewPage(path: picList[index], tag: index),
-                    // settings: RouteSettings(isInitialRoute: true),
-//                    fullscreenDialog: true,
-                  ),
-                );
+                provider.setSelPicIdx(index);
+                if (preview) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              PicViewPage(path: picList[index], tag: index),
+                          fullscreenDialog: true));
+                } else {
+                  provider.readFile(picList[index].split('/')[2].split('.')[0]);
+                }
               },
               child: Hero(
                 tag: index,
@@ -822,21 +904,27 @@ class _PicViewPageState extends State<PicViewPage> {
   @override
   Widget build(BuildContext context) {
     var rpx = MediaQuery.of(context).size.width / 750;
-    return Scaffold(
-      body: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Hero(
+        flightShuttleBuilder: (flightContext, animation, direction,
+            fromContext, toContext) {
+          return Image.asset(
+            widget.path,
+            fit: BoxFit.fitWidth,
+          );
         },
-        child: Hero(
-          tag: widget.tag,
-          child: Container(
-            width: 750 * rpx,
-            height: MediaQuery.of(context).size.height,
-            color: Colors.black,
-            child: Image.asset(
-              widget.path,
-              fit: BoxFit.fitWidth,
-            ),
+        transitionOnUserGestures: true,
+        tag: widget.tag,
+        child: Container(
+          width: 750 * rpx,
+          // height: MediaQuery.of(context).size.height,
+          // color: Colors.black,
+          child: Image.asset(
+            widget.path,
+            fit: BoxFit.fitWidth,
           ),
         ),
       ),
