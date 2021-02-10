@@ -87,19 +87,19 @@ class _BtmBarState extends State<BtmBar> {
   tapItem(index) {
     switch (index) {
       case 1:
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => MultiProvider(
-                        providers: [
-                          ChangeNotifierProvider(
-                            create: (context) => PostsGalleryProvider(),
-                          )
-                        ],
-                        child: PaceMain(
-                          selIndex: index,
-                        ))),
-            ModalRoute.withName("/pace"));
+        // Navigator.pushAndRemoveUntil(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => MultiProvider(
+        //                 providers: [
+        //                   ChangeNotifierProvider(
+        //                     create: (context) => PostsGalleryProvider(),
+        //                   )
+        //                 ],
+        //                 child: PaceMain(
+        //                   selIndex: index,
+        //                 ))),
+        //     ModalRoute.withName("/pace"));
         break;
 
       /*底部菜单滑出界面*/

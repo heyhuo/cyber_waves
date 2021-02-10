@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+
 part 'PostsModel.g.dart';
-
-
 // flutter packages pub run build_runner build
 @JsonSerializable()
 class PostsModel extends Object{
@@ -33,7 +32,4 @@ class PostsModel extends Object{
       ,this.ifOfficial,this.ifUserLoved,this.latitude,this.longitude,this.makerID,this.makerName,this.makerPhoto,this.picsPath,this.picsRate,this.picsSimpPath,this.postsLocation,this.postsStatus
       ,this.postsType,this.whenPosts);
 
-
-  factory PostsModel.fromJson(Map<String, dynamic> json) => _$PostsModelFromJson(json);
-  Map<String, dynamic> toJson() => _$PostsModelToJson(this);
 }

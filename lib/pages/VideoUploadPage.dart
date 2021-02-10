@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cyber_waves/providers/EditContentProvider.dart';
+import 'package:cyber_waves/wigets/CloseBtn.dart';
+import 'package:cyber_waves/wigets/WrapPicList.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -135,6 +137,7 @@ class _VideoUploadState extends State<VideoUpload> {
                             // height: 80*rpx,
                             // color: Colors.red,
                             child: IconButton(
+                              onPressed: (){},
                               icon: Icon(
                                 Icons.arrow_circle_up_sharp,
                                 color: Colors.white,
@@ -555,32 +558,7 @@ class TagItem extends StatelessWidget {
   }
 }
 
-class CloseBtn extends StatelessWidget {
-  const CloseBtn(
-      {Key key, this.rpx, this.radius, this.size, this.bgColor, this.iconColor})
-      : super(key: key);
-  final double rpx;
-  final double radius;
-  final double size;
-  final Color bgColor;
-  final Color iconColor;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(left: 10 * rpx),
-      child: CircleAvatar(
-        radius: radius * rpx,
-        child: Icon(
-          Icons.close,
-          color: iconColor,
-          size: size * rpx,
-        ),
-        backgroundColor: bgColor,
-      ),
-    );
-  }
-}
 
 class ContentField extends StatefulWidget {
   const ContentField(
@@ -695,242 +673,7 @@ class _ContentFieldState extends State<ContentField> {
   }
 }
 
-class WrapPicList extends StatefulWidget {
-  const WrapPicList(this.provider,
-      {Key key, @required this.rpx, this.maxSize = 9, this.preview})
-      : super(key: key);
-  final double rpx;
-  final int maxSize;
-  final provider;
-  final preview;
 
-  @override
-  _WrapPicListState createState() => _WrapPicListState();
-}
-
-class _WrapPicListState extends State<WrapPicList> {
-  double rpx;
-  List<String> picList;
-  var provider;
-  int maxSize;
-  bool preview;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    rpx = widget.rpx;
-    maxSize = widget.maxSize;
-    provider = widget.provider;
-    preview = widget.preview;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    picList = widget.provider.picList;
-    return Container(
-      margin: EdgeInsets.only(top: 10 * rpx),
-      child: Wrap(
-        alignment: WrapAlignment.start,
-        spacing: 5 * rpx, //主轴上子控件的间距
-        runSpacing: 2 * rpx, //交叉轴上子控件之间的间距
-        children: _pictures(), //要显示的子控件集合
-      ),
-    );
-  }
-
-  List<Widget> _pictures() {
-    var len = min(this.picList.length + 1, maxSize);
-    return List.generate(len, (index) {
-      if (this.picList.length < maxSize && index == len - 1) {
-        return Container(
-          width: 200 * rpx,
-          height: 200 * rpx,
-          margin: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20.0 * rpx)),
-          child: Icon(
-            Icons.add,
-            size: 80 * rpx,
-            color: Colors.white.withOpacity(0.5),
-          ),
-        );
-      } else {
-        return PicItem(provider, rpx: rpx, index: index, preview: preview);
-      }
-    });
-  }
-}
-
-/*class PictureList extends StatelessWidget {
-  const PictureList(this.provider, this.picList, {Key key, this.rpx})
-      : super(key: key);
-  final double rpx;
-  final provider;
-  final List<String> picList;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: 10 * rpx),
-      child: Wrap(
-        alignment: WrapAlignment.start,
-        spacing: 5 * rpx, //主轴上子控件的间距
-        runSpacing: 2 * rpx, //交叉轴上子控件之间的间距
-        children: _pictures(), //要显示的子控件集合
-      ),
-    );
-  }
-
-  List<Widget> _pictures() {
-    var len = min(this.picList.length + 1, 9);
-    return List.generate(len, (index) {
-      if (this.picList.length < 9 && index == len - 1) {
-        return Container(
-          width: 200 * rpx,
-          height: 200 * rpx,
-          margin: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20.0 * rpx)),
-          child: Icon(
-            Icons.add,
-            size: 80 * rpx,
-            color: Colors.white.withOpacity(0.5),
-          ),
-        );
-      } else {
-        return PicItem(provider, rpx: rpx, index: index);
-      }
-    });
-  }
-}*/
-
-class PicItem extends StatelessWidget {
-  const PicItem(this.provider,
-      {Key key, this.rpx, this.index, this.preview = true})
-      : super(key: key);
-  final double rpx;
-  final int index;
-  final provider;
-  final bool preview;
-
-  @override
-  Widget build(BuildContext context) {
-    // EditContentProvider provider = Provider.of<EditContentProvider>(context);
-    var picList = provider.picList;
-    var selPicIdx = provider.selPicIdx;
-    return Container(
-        width: 220 * rpx,
-        height: 220 * rpx,
-        // padding: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
-        decoration: BoxDecoration(
-            // color: Colors.yellow,
-            border: Border.all(
-                style:
-                    selPicIdx != index ? BorderStyle.none : BorderStyle.solid,
-                width: 2,
-                color: Colors.greenAccent),
-            borderRadius: BorderRadius.circular(20.0 * rpx)),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                provider.setSelPicIdx(index);
-                if (preview) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              PicViewPage(path: picList[index], tag: index),
-                          fullscreenDialog: true));
-                } else {
-                  provider.readFile(picList[index].split('/')[2].split('.')[0]);
-                }
-              },
-              child: Hero(
-                tag: index,
-                child: Container(
-                  margin: EdgeInsets.only(top: 20 * rpx, left: 20 * rpx),
-                  width: 200 * rpx,
-                  height: 200 * rpx,
-                  decoration: BoxDecoration(
-                    // color: Colors.yellow,
-                    borderRadius: BorderRadius.circular(20.0 * rpx),
-                    image: DecorationImage(image: AssetImage(picList[index])),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 0 * rpx,
-              left: 0,
-              child: GestureDetector(
-                onTap: () {
-                  provider.removePic(index);
-                },
-                child: Container(
-                  width: 60 * rpx,
-                  height: 60 * rpx,
-                  // color: Colors.red,
-                  padding: EdgeInsets.only(bottom: 10 * rpx, right: 10 * rpx),
-                  child: CloseBtn(
-                    rpx: rpx,
-                    radius: 20,
-                    size: 30,
-                    bgColor: Colors.white.withOpacity(0.6),
-                    iconColor: Colors.black.withOpacity(0.5),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ));
-  }
-}
-
-class PicViewPage extends StatefulWidget {
-  const PicViewPage({Key key, @required this.path, @required this.tag})
-      : super(key: key);
-  final String path;
-  final tag;
-
-  @override
-  _PicViewPageState createState() => _PicViewPageState();
-}
-
-class _PicViewPageState extends State<PicViewPage> {
-  @override
-  Widget build(BuildContext context) {
-    var rpx = MediaQuery.of(context).size.width / 750;
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Hero(
-        flightShuttleBuilder: (flightContext, animation, direction,
-            fromContext, toContext) {
-          return Image.asset(
-            widget.path,
-            fit: BoxFit.fitWidth,
-          );
-        },
-        transitionOnUserGestures: true,
-        tag: widget.tag,
-        child: Container(
-          width: 750 * rpx,
-          // height: MediaQuery.of(context).size.height,
-          // color: Colors.black,
-          child: Image.asset(
-            widget.path,
-            fit: BoxFit.fitWidth,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class MusicCtn extends StatelessWidget {
   const MusicCtn({Key key, this.rpx}) : super(key: key);

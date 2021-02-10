@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
 import 'package:cyber_waves/pages/SelectUploadModePage.dart';
 import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/BottomBar.dart';
@@ -11,7 +9,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:tflite_flutter/tflite_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -146,7 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /*图片空间*/
   Uint8List _bytes;
-  Image _ss;
 
   Widget _ImgeView() {
     if (_bytes == null) {

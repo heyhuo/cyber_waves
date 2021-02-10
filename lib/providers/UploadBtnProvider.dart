@@ -1,8 +1,10 @@
+import 'package:cyber_waves/models/AnimeOriginalModel.dart';
 import 'package:cyber_waves/pages/GeneratorPage.dart';
 import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/pages/VideoUploadPage.dart';
 import 'package:cyber_waves/providers/EditContentProvider.dart';
 import 'package:cyber_waves/providers/GeneratorProvider.dart';
+import 'package:cyber_waves/tools/sqliteHelper.dart';
 import 'package:cyber_waves/wigets/MakerMain.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +22,7 @@ class UploadBtnProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setHeroTag(tag, context) {
+  setHeroTag(tag, context) async {
     heroTag = tag;
     if ("sticker" == tag)
       Navigator.push(
@@ -54,12 +56,16 @@ class UploadBtnProvider extends ChangeNotifier {
         );
       }));
     } else if ("video" == tag) {
+      // await Future.delayed(Duration(seconds: 1));
+      List<AnimeOriginalModel> picList =
+          await SqliteHelper().findAnimeList("heyhuo", "");
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (BuildContext context) {
                 return MultiProvider(providers: [
-                  ChangeNotifierProvider(create: (_) => GeneratorProvider()),
+                  ChangeNotifierProvider(
+                      create: (_) => GeneratorProvider(picList: picList)),
                 ], child: GeneratorPage());
               },
               fullscreenDialog: true));

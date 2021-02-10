@@ -69,7 +69,7 @@ class _UserContentItemState extends State<UserContentItem> {
                 image: AssetImage("assets/gif/g1.gif"), fit: BoxFit.fill)),
         width: 750 * rpx,
         child: Container(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.white.withOpacity(0.4),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -94,7 +94,7 @@ class _UserContentItemState extends State<UserContentItem> {
                               // color: Colors.blue,
                               child: Text(
                                 "中之人sakura",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: Colors.black),
                               ),
                             ),
                           ],
@@ -113,13 +113,13 @@ class _UserContentItemState extends State<UserContentItem> {
                     /*内容*/
                     Container(
                         width: 600 * rpx,
-                        color: Colors.red,
+                        color: Colors.white54.withOpacity(0.2),
                         // padding: EdgeInsets.only(right: 10 * rpx),
                         child: Container(
                             child: Text(
                               "文字描述字描述文\n字描述字描述文字描述字\n描述",
                               style: TextStyle(
-                                  color: Colors.grey.shade300, letterSpacing: 3),
+                                  color: Colors.black, letterSpacing: 3),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 5,
                             ))),
@@ -151,7 +151,7 @@ class _UserContentItemState extends State<UserContentItem> {
         ),
         child: Text(
           tagName,
-          style: TextStyle(fontSize: 11, color: Colors.grey.shade100),
+          style: TextStyle(fontSize: 11, color: Colors.black),
         ));
   }
 
@@ -159,11 +159,12 @@ class _UserContentItemState extends State<UserContentItem> {
   Widget _getGridPic() {
     return Container(
       // color: Colors.blue,
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      // padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
-          color: Colors.blue,
+          color: Colors.black.withOpacity(0.3)
           ),
+      child: Icon(Icons.photo_outlined,color: Colors.white54,size: 35,),
       // height:10 * rpx,
       // width: 10*rpx,
     );

@@ -1,14 +1,19 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cyber_waves/models/AnimeOriginalModel.dart';
 import 'package:cyber_waves/providers/GeneratorProvider.dart';
 import 'package:cyber_waves/wigets/AnimationWidget.dart';
+import 'package:cyber_waves/wigets/CropImage.dart';
+import 'package:cyber_waves/wigets/WrapPicList.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:cyber_waves/wigets/CropImage.dart';
 
 import 'VideoUploadPage.dart';
 
@@ -44,6 +49,7 @@ class _GeneratorState extends State<Generator> {
   var ur;
   TFRunModel tfModel;
   double rpx;
+  List picList;
 
   // Status status;
 
@@ -59,6 +65,7 @@ class _GeneratorState extends State<Generator> {
   Widget build(BuildContext context) {
     provider = Provider.of<GeneratorProvider>(context);
     imgBytesList = provider.imageBytesList;
+
     height = MediaQuery.of(context).size.height;
     hr = height / 3;
     tfModel = TFRunModel(provider);
@@ -66,166 +73,204 @@ class _GeneratorState extends State<Generator> {
       width: 750 * widget.rpx,
       height: height,
       color: Colors.black.withOpacity(0.5),
-      child: Column(
+      child: Stack(
         children: [
-          /*标题栏*/
-          Container(
-            height: 160 * rpx,
-            color: Colors.black.withOpacity(0.5),
-            // margin: EdgeInsets.only(top: 30),
-            child: Container(
-              margin: EdgeInsets.only(top: 45 * rpx),
-              child: ListTile(
-                title: Center(
-                    child: Text(
-                  "",
-                  style: TextStyle(color: Colors.white),
-                )),
-                leading: Container(
-                  width: 200 * rpx,
-                  height: 70 * rpx,
-                  // color: Colors.red,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        // color: Colors.yellow,
-                        width: 60 * rpx,
-                        child: IconButton(
-                            highlightColor: Colors.white,
-                            icon: Icon(Icons.arrow_back_ios,
-                                color: Colors.grey.shade400),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            }),
-                      ),
-                      Container(
-                        width: 140 * rpx,
-                        // color: Colors.yellow,
-                        child: Text(
-                          "返回",
-                          style: TextStyle(
-                              color: Colors.grey.shade400, fontSize: 12),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                /*trailing: Container(
-                  width: 160 * rpx,
-                  height: 74 * rpx,
-                  decoration: BoxDecoration(
-                      color: Colors.green.shade600.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(20.0)),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 60 * rpx,
-                        // height: 80*rpx,
-                        // color: Colors.red,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_circle_up_sharp,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Container(
-                          width: 80 * rpx,
-                          // margin: EdgeInsets.only(left: 0),
-                          // color: Colors.yellow,
-                          child: Text(
-                            "发布",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15),
-                          ))
-                    ],
-                  ),
-                ),*/
-              ),
-            ),
-          ),
           Container(
               width: 750 * widget.rpx,
-              height: hr * (ur - 0.3),
-              color: Colors.black.withOpacity(0.4),
-              child: Stack(
-                children: [
-                  Positioned(
-                    // top: 50,
-                    left: 0,
-                    child: Stack(
-                      children: [
-                        Container(
-                            width: 750 * widget.rpx,
-                            height: hr * (ur - 0.3),
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage("assets/images/bg2.jpg"),
-                                  fit: BoxFit.fill),
-                              color: Colors.pinkAccent.withOpacity(0.6),
-                            )),
-                        Container(
+              // height: ,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/bg2.jpg"),
+                    fit: BoxFit.fitHeight),
+                color: Colors.white.withOpacity(0.6),
+              )),
+          /*上层*/
+          Column(
+            children: [
+              /*标题栏*/
+              Container(
+                height: 160 * rpx,
+                color: Colors.black.withOpacity(0.5),
+                // margin: EdgeInsets.only(top: 30),
+                child: Container(
+                  margin: EdgeInsets.only(top: 45 * rpx),
+                  child: ListTile(
+                    title: Center(
+                        child: Text(
+                      "",
+                      style: TextStyle(color: Colors.white),
+                    )),
+                    leading: Container(
+                      width: 200 * rpx,
+                      height: 70 * rpx,
+                      // color: Colors.red,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            // color: Colors.yellow,
+                            width: 60 * rpx,
+                            child: IconButton(
+                                highlightColor: Colors.white,
+                                icon: Icon(Icons.arrow_back_ios,
+                                    color: Colors.grey.shade400),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }),
+                          ),
+                          Container(
+                            width: 140 * rpx,
+                            // color: Colors.yellow,
+                            child: Text(
+                              "返回",
+                              style: TextStyle(
+                                  color: Colors.grey.shade400, fontSize: 12),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    /*trailing: Container(
+                      width: 160 * rpx,
+                      height: 74 * rpx,
+                      decoration: BoxDecoration(
+                          color: Colors.green.shade600.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(20.0)),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            width: 60 * rpx,
+                            // height: 80*rpx,
+                            // color: Colors.red,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_circle_up_sharp,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Container(
+                              width: 80 * rpx,
+                              // margin: EdgeInsets.only(left: 0),
+                              // color: Colors.yellow,
+                              child: Text(
+                                "发布",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15),
+                              ))
+                        ],
+                      ),
+                    ),*/
+                  ),
+                ),
+              ),
+              /*展示栏*/
+              Container(
+                  width: 750 * widget.rpx,
+                  height: hr * (ur - 0.3),
+                  color: Colors.black.withOpacity(0.4),
+                  child: Stack(
+                    children: [
+                      /*图片*/
+                      Positioned(
+                        // top: 20,
+                        left: 0,
+                        child: Container(
                           padding: EdgeInsets.only(
-                            top: 100,
+                            top: 40,
                           ),
                           width: 750 * widget.rpx,
                           height: hr * (ur - 0.3),
                           decoration: BoxDecoration(
-                            color: Colors.deepPurpleAccent.withOpacity(0.2),
-                          ),
-                          child: Center(child: ShowGenerate()),
+                              color: Colors.white.withOpacity(0.2)),
+                          child: Container(
+                              child: ShowAnime(model: provider.showModel)),
                         ),
+                      ),
+                      /*画框*/
+                      Visibility(
+                        visible: (provider.showModel==null||provider.showModel.generateTag==0)?true:false,
+                        child: Positioned(
+                          bottom: 0,
+                          left: 90,
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.redAccent.withOpacity(0.5),
+                                      width: 3)),
+                              child: CustomPaint(
+                                size: Size(400 * rpx, 400 * rpx),
+                                painter: ImageCropPainter(rpx),
+                              )),
+                        ),
+                      ),
+                    ],
+                  )),
+              /*贴纸栏*/
+              Container(
+                height: hr * (3 - ur) + 3,
+                color: Colors.black.withOpacity(0.4),
+                child: Column(
+                  children: [
+                    /*功能按钮*/
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _generateBtn(
+                          Icons.animation,
+                          "生成",
+                        ),
+                        _generateBtn(Icons.photo_outlined, "设置背景图"),
+                        _generateBtn(Icons.color_lens_outlined, "设置颜色"),
+                        _generateBtn(Icons.emoji_emotions_outlined, "动画"),
+                        /*Container(
+                          width: 100,
+                          height: 100,
+                          // color: Colors.yellow,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.emoji_emotions_sharp,
+                              color: Colors.white,
+                              size: 50,
+                            ),
+                            onPressed: () {
+                              // provider.readFile(provider.fileName);
+                            },
+                          ),
+                        ),*/
                       ],
                     ),
-                  ),
-                ],
-              )),
-          Container(
-            height: hr * (3 - ur) + 3,
-            color: Colors.black.withOpacity(0.4),
-            child: Column(
-              children: [
-                Container(
-                  height: hr * (3 - ur) - 80,
-                  child: SingleChildScrollView(
-                      child: WrapPicList(provider,
-                          rpx: widget.rpx, maxSize: 20, preview: false)),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _generateBtn(
-                      Icons.animation,
-                      "生成",
+                    Container(
+                      height: hr * (3 - ur) - 80,
+                      child: SingleChildScrollView(
+                          child: WrapPicList(provider,
+                              rpx: widget.rpx, maxSize: 20, preview: false)),
                     ),
-                    _generateBtn(Icons.photo_outlined, "设置背景图"),
-                    _generateBtn(Icons.color_lens_outlined, "设置颜色"),
-                    _generateBtn(Icons.emoji_emotions_outlined, "动画"),
-                    /*Container(
-                      width: 100,
-                      height: 100,
-                      // color: Colors.yellow,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.emoji_emotions_sharp,
-                          color: Colors.white,
-                          size: 50,
-                        ),
-                        onPressed: () {
-                          // provider.readFile(provider.fileName);
-                        },
-                      ),
-                    ),*/
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          /*加载中*/
+          Visibility(
+            visible: provider.isGenerating,
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: Container(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4.0,
+                    backgroundColor: Colors.blue,
+                    valueColor: new AlwaysStoppedAnimation<Color>(Colors.red),
+                  ),
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -253,7 +298,10 @@ class _GeneratorState extends State<Generator> {
               onPressed: () {
                 if (tag == "生成")
                   _runModel();
-                else if (tag == "动画") provider.readFile(provider.fileName);
+                else if (tag == "动画") {
+                  provider.readFile(
+                      provider.showModel.userId, provider.showModel.animeId);
+                }
               },
             ),
           ),
@@ -309,9 +357,13 @@ class _GeneratorState extends State<Generator> {
 
   Future _runModel() async {
     if (_interpreter == null) _loadModel();
-    var name = provider.imageName;
+    provider.setGenerating();
 
-    var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
+    var animeId = provider.showModel.animeId;
+    var userId = provider.showModel.userId;
+    var name = provider.showModel.animePath;
+
+    var imageBytes = (await /*rootBundle.load(name)*/File(name).readAsBytes()).buffer.asUint8List();
     img.Image oriImage = img.decodePng(imageBytes);
 //这个裁剪对画质有影响
     img.Image resizedImage = img.copyResize(oriImage,
@@ -339,8 +391,10 @@ class _GeneratorState extends State<Generator> {
     }
     // _interpreter.close();
 
-    await provider.writeFile(provider.fileName);
-    // await provider.readFile(provider.fileName);
+    await provider.writeFile(userId, animeId);
+
+    provider.updateGenerateTag(userId, animeId);
+    provider.setGenerating();
   }
 
   Float32List imageToByteListFloat32(
@@ -415,8 +469,8 @@ class ShowGenerate extends StatelessWidget {
     }
     return ImagesAnimation(
       list,
-      w: 200,
-      h: 200,
+      w: 256,
+      h: 256,
     );
     /*Column(
       children: List.generate(len, (index) {
@@ -453,7 +507,6 @@ class GenerateBtn extends StatelessWidget {
           size: 40,
         ),
         onPressed: () {
-// _loadModel(false);
           tfModel.runModel();
         },
       ),
@@ -504,9 +557,9 @@ class TFRunModel {
 
   Future runModel() async {
     if (_interpreter == null) loadModel();
-    var name = provider.imageName;
 
-    var imageBytes = (await rootBundle.load(name)).buffer.asUint8List();
+    var imagePath = provider.showImagePath;
+    var imageBytes = (await rootBundle.load(imagePath)).buffer.asUint8List();
     img.Image oriImage = img.decodePng(imageBytes);
 //这个裁剪对画质有影响
     img.Image resizedImage = img.copyResize(oriImage,
@@ -583,5 +636,29 @@ class TFRunModel {
     p = p * 2 - 1;
 
     return p;
+  }
+}
+
+class ShowAnime extends StatelessWidget {
+  const ShowAnime({Key key, this.model}) : super(key: key);
+  final AnimeOriginalModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    if (model == null)
+      return Icon(
+        Icons.insert_emoticon,
+        size: 120,
+        color: Colors.white.withOpacity(0.5),
+      );
+    else if (model.generateTag == 0)
+      return Container(
+        child: Image.file(
+          File(model.animePath),
+          fit: BoxFit.fitHeight,
+        ),
+      );
+    else
+      return Container(child: Center(child: ShowGenerate()));
   }
 }
