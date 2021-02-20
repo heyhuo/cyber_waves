@@ -11,7 +11,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 
-class EditContentProvider extends ChangeNotifier {
+class UploadPostItemProvider extends ChangeNotifier {
   var tagList = <Widget>[];
   var musicPath, content, selPicIdx=0,thumbPath, latitude, longitude, location;
   var picList = List<String>();
@@ -25,10 +25,15 @@ class EditContentProvider extends ChangeNotifier {
   var dateTimeRex = "yyyy-MM-dd HH:mm:ss";
   var dateRex = "yyyyMMdd";
 
-  EditContentProvider();
+  UploadPostItemProvider();
 
   setSelPicIdx(idx) {
     selPicIdx = idx;
+    notifyListeners();
+  }
+
+  setMusicPath(url){
+    this.musicPath = url;
     notifyListeners();
   }
 
@@ -115,7 +120,7 @@ class EditContentProvider extends ChangeNotifier {
       // print("图片数据：$imageData");
     }
     print("图片数量:${imageList.length}");
-
+    var musicPath = Utils.getMusicId(this.musicPath);
     var dateTimeNow = Utils.getFormatDateTimeNow(dateTimeRex);
     var userId = "admin";
     PostModel postModel = new PostModel(

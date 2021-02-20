@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cyber_waves/pages/SelectUploadModePage.dart';
+import 'package:cyber_waves/providers/MusicProvider.dart';
 import 'package:cyber_waves/providers/PostItemProvider.dart';
 import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/BottomBar.dart';
@@ -96,7 +97,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ChangeNotifierProvider(
                 create: (context) => UploadBtnProvider(false, "")),
             ChangeNotifierProvider(
-                create: (context) => PostItemProvider())
+                create: (context) => PostItemProvider()),
+            ChangeNotifierProvider(
+                create: (context) => MusicProvider())
           ],
           child: Stack(
             children: [
@@ -110,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
               /*滚动列表*/
               Positioned(
                   child: Container(
+                    // color: Colors.black.w,
                 margin: EdgeInsets.only(top: 80 * rpx),
                 width: 750 * rpx,
                 height: MediaQuery.of(context).size.height-180*rpx,

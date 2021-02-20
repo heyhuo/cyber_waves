@@ -2,6 +2,7 @@ import 'package:cyber_waves/models/AnimeOriginalModel.dart';
 import 'package:cyber_waves/pages/GeneratorPage.dart';
 import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/pages/UploadPage.dart';
+import 'package:cyber_waves/providers/MusicProvider.dart';
 import 'package:cyber_waves/providers/UploadPostItemProvider.dart';
 import 'package:cyber_waves/providers/GeneratorProvider.dart';
 import 'package:cyber_waves/tools/sqliteHelper.dart';
@@ -41,10 +42,11 @@ class UploadBtnProvider extends ChangeNotifier {
       Navigator.push(context, MaterialPageRoute(builder: (context) {
         return MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => EditContentProvider()),
+            ChangeNotifierProvider(create: (_) => UploadPostItemProvider()),
+            ChangeNotifierProvider(create: (_) => MusicProvider()),
             ChangeNotifierProvider(create: (_) => WrapPicListProvider("uploader"))
           ],
-          child: VideoUploadPage(),
+          child: UploadPage(),
         );
       }));
     } else if ("video" == tag) {

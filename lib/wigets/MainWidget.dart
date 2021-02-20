@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cyber_waves/models/PostModel.dart';
+import 'package:cyber_waves/providers/MusicProvider.dart';
 import 'package:cyber_waves/providers/PostItemProvider.dart';
 import 'package:cyber_waves/tools/WebRequest.dart';
 import 'package:cyber_waves/tools/WidgetHelper.dart';
@@ -23,6 +24,7 @@ class MainWidget extends StatefulWidget {
 class _MainWidgetState extends State<MainWidget> {
   double rpx;
   PostItemProvider postItemProvider;
+  MusicProvider musicProvider;
   List<PostModel> postList;
 
   @override
@@ -35,6 +37,7 @@ class _MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     postItemProvider = Provider.of<PostItemProvider>(context);
+    musicProvider = Provider.of<MusicProvider>(context);
     // postItemProvider.getPostItemList(1);
     return RefreshPage(provider: postItemProvider);
   }
@@ -86,7 +89,11 @@ class _RefreshPageState extends State<RefreshPage> {
       controller: _refreshController,
       // enablePullUp: true,
       enablePullDown: true,
-      header: WaterDropHeader(),
+      header: BezierCircleHeader(
+        bezierColor: Theme.of(context).primaryColorLight,
+        circleColor: Colors.yellowAccent,
+        circleType: BezierCircleType.Progress,
+      ),
       footer: CustomFooter(
         builder: (BuildContext context, LoadStatus mode) {
           Widget body;
@@ -107,11 +114,6 @@ class _RefreshPageState extends State<RefreshPage> {
       ),
       onLoading: _onLoading,
       onRefresh: _onRefresh,
-      // child: ListView.builder(
-      //   itemBuilder: (c, i) => UserContentItem(postList[i]),
-      //   itemExtent: 100.0,
-      //   itemCount: postList.length,
-      // ),
       child: ListView.builder(
           // controller: controller,
           // shrinkWrap: true,
@@ -120,62 +122,10 @@ class _RefreshPageState extends State<RefreshPage> {
             return UserContentItem(postList[index], provider);
           }),
     );
-    // return Stack(
-    //   children: [
-    //     postList != null
-    //         ? RefreshIndicator(
-    //             color: Colors.pinkAccent,
-    //             onRefresh: () {
-    //               return Future.delayed(Duration(milliseconds: 500), () {
-    //                 /* data.insert(0, "add new item");
-    //                 setState(() {
-    //                   data = data;
-    //                 });*/
-    //               });
-    //             },
-    //             child: NotificationListener<ScrollNotification>(
-    //               onNotification: (scroll) {
-    //                 if (!ifLoading &&
-    //                     scroll.metrics.maxScrollExtent <=
-    //                         controller.offset + 200) {
-    //                   setState(() {
-    //                     ifLoading = true;
-    //                   });
-    //
-    //                   /* List.generate(30, (index) {
-    //                     data.add("item ${data.length + 1}");
-    //                   });*/
-    //                   Future.delayed(Duration(milliseconds: 500), () {
-    //                     setState(() {
-    //                       // data = data;
-    //                       ifLoading = false;
-    //                     });
-    //                   });
-    //                 }
-    //                 return;
-    //               },
-    //               child: ListView.builder(
-    //                   controller: controller,
-    //                   shrinkWrap: true,
-    //                   itemCount: postList.length,
-    //                   itemBuilder: (context, index) {
-    //                     return UserContentItem(postList[index]);
-    //                   }),
-    //             ))
-    //         : Container(
-    //             child: CircularProgressIndicator(),
-    //           ),
-    //     ifLoading
-    //         ? Center(
-    //             child: CircularProgressIndicator(),
-    //           )
-    //         : Container()
-    //   ],
-    // );
   }
 
   void _onRefresh() async {
-    provider.getPostItemList(ifFront: true);
+    provider.getPostItemList(ifRefresh: true);
     _refreshController.refreshCompleted();
   }
 
@@ -220,10 +170,11 @@ class _UserContentItemState extends State<UserContentItem> {
     return Container(
       /*背景图*/
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5)
-         /* image: DecorationImage(
-              image: NetworkImage("$ipPortBasePath${postModel.thumbPath}"),
-              fit: BoxFit.fitWidth)*/),
+          color: Colors.black.withOpacity(0.5),
+          image: DecorationImage(
+              image: NetworkImage("$ipPortBasePath${postModel.thumbPath}",
+                  scale: 0.01),
+              fit: BoxFit.fitWidth)),
       width: 750 * rpx,
       child: Container(
         color: Colors.black.withOpacity(0.6),
@@ -329,16 +280,16 @@ class _UserContentItemState extends State<UserContentItem> {
         //   color: Colors.black.withOpacity(0.3),
         // ),
         child: Card(
-          color: Colors.black.withOpacity(0.3),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadiusDirectional.circular(6.0)),
-          clipBehavior: Clip.antiAlias,
-          child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image: "$ipPortBasePath${picPath}",
-            fit: BoxFit.fitWidth,
-          ),
-        )
+      color: Colors.black.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.circular(6.0)),
+      clipBehavior: Clip.antiAlias,
+      child: FadeInImage.memoryNetwork(
+        placeholder: kTransparentImage,
+        image: "$ipPortBasePath${picPath}",
+        fit: BoxFit.fitWidth,
+      ),
+    )
         // height:10 * rpx,
         // width: 10*rpx,
         );

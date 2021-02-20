@@ -43,4 +43,12 @@ class WebRequest extends Object {
         queryParameters: params); //
     return url;
   }
+
+ static String joinUrlParams(String url, Map<String, String> params) {
+    StringBuffer baseUrl = new StringBuffer("$url?");
+    for (var key in params.keys) {
+      baseUrl.write("${key}=${params[key]}&");
+    }
+    return baseUrl.toString();
+  }
 }

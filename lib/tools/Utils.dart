@@ -53,4 +53,12 @@ class Utils extends Object{
     return dateString;
   }
 
+  static String getMusicId(url){
+  url.startsWith("song");
+  int start = url.indexOf("song");
+  int end = url.indexOf("user");
+  var musicId = url.substring(start + 5, end - 2);
+  return musicId;
+  }
+
 }

@@ -15,14 +15,21 @@ class PostItemProvider with ChangeNotifier {
   PostItemProvider();
 
   /* 获取动态数据 */
-  Future getPostItemList({ifFront = false}) async {
+  Future getPostItemList({ifRefresh = false}) async {
+    int pageNum;
+    if(ifRefresh){
+      pageNum=1;
+      postList.clear();
+    }else{
+      pageNum = ++page;
+    }
     if(ipPort==null){
      var u= await webRequest.generate("");
      ipPort = u.toString();
     }
     var apiUrl = "$ipPort/$baseUrl/getPostItemList";
     var response = await dio.request(apiUrl,
-        data: {"page": page, "size": this.size},
+        data: {"page": pageNum, "size": this.size},
         options: Options(method: "POST"));
     // print(response);
     var list = List<PostModel>(); //List.castFrom(response.data["result"]);
@@ -32,9 +39,6 @@ class PostItemProvider with ChangeNotifier {
       list.add(PostModel.fromJson(obj));
     }
 
-    if (ifFront) {
-      idx = 0;
-    }
     postList.insertAll(idx, list);
 
     print(postList.length);

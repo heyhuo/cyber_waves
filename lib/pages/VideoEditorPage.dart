@@ -194,7 +194,7 @@ class _VideoEditorState extends State<VideoEditor> {
                 child: GestureDetector(
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => VideoUploadPage()));
+                    MaterialPageRoute(builder: (context) => UploadPage()));
               },
               child: Icon(
                 Icons.forward,
