@@ -15,7 +15,7 @@ import 'package:image/image.dart' as img;
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:cyber_waves/wigets/CropImage.dart';
 
-import 'VideoUploadPage.dart';
+import 'UploadPage.dart';
 
 class GeneratorPage extends StatefulWidget {
   const GeneratorPage({Key key}) : super(key: key);
@@ -42,7 +42,7 @@ class Generator extends StatefulWidget {
 }
 
 class _GeneratorState extends State<Generator> {
-  GeneratorProvider provider;
+  GeneratorProvider generatorProvider;
   var imgBytesList;
   var height;
   var hr;
@@ -63,12 +63,12 @@ class _GeneratorState extends State<Generator> {
 
   @override
   Widget build(BuildContext context) {
-    provider = Provider.of<GeneratorProvider>(context);
-    imgBytesList = provider.imageBytesList;
+    generatorProvider = Provider.of<GeneratorProvider>(context);
+    imgBytesList = generatorProvider.imageBytesList;
 
     height = MediaQuery.of(context).size.height;
     hr = height / 3;
-    tfModel = TFRunModel(provider);
+    tfModel = TFRunModel(generatorProvider);
     return Container(
       width: 750 * widget.rpx,
       height: height,
@@ -188,12 +188,12 @@ class _GeneratorState extends State<Generator> {
                           decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2)),
                           child: Container(
-                              child: ShowAnime(model: provider.showModel)),
+                              child: ShowAnime(model: generatorProvider.showModel)),
                         ),
                       ),
                       /*画框*/
                       Visibility(
-                        visible: (provider.showModel==null||provider.showModel.generateTag==0)?true:false,
+                        visible: (generatorProvider.showModel==null||generatorProvider.showModel.generateTag==0)?true:false,
                         child: Positioned(
                           bottom: 0,
                           left: 90,
@@ -247,8 +247,7 @@ class _GeneratorState extends State<Generator> {
                     Container(
                       height: hr * (3 - ur) - 80,
                       child: SingleChildScrollView(
-                          child: WrapPicList(provider,
-                              rpx: widget.rpx, maxSize: 20, preview: false)),
+                          child: WrapPicList(generatorProvider,null,rpx)),
                     ),
                   ],
                 ),
@@ -257,7 +256,7 @@ class _GeneratorState extends State<Generator> {
           ),
           /*加载中*/
           Visibility(
-            visible: provider.isGenerating,
+            visible: generatorProvider.isGenerating,
             child: Container(
               color: Colors.black.withOpacity(0.5),
               child: Center(
@@ -299,8 +298,8 @@ class _GeneratorState extends State<Generator> {
                 if (tag == "生成")
                   _runModel();
                 else if (tag == "动画") {
-                  provider.readFile(
-                      provider.showModel.userId, provider.showModel.animeId);
+                  generatorProvider.readFile(
+                      generatorProvider.showModel.userId, generatorProvider.showModel.animeId);
                 }
               },
             ),
@@ -357,11 +356,11 @@ class _GeneratorState extends State<Generator> {
 
   Future _runModel() async {
     if (_interpreter == null) _loadModel();
-    provider.setGenerating();
+    generatorProvider.setGenerating();
 
-    var animeId = provider.showModel.animeId;
-    var userId = provider.showModel.userId;
-    var name = provider.showModel.animePath;
+    var animeId = generatorProvider.showModel.animeId;
+    var userId = generatorProvider.showModel.userId;
+    var name = generatorProvider.showModel.animePath;
 
     var imageBytes = (await /*rootBundle.load(name)*/File(name).readAsBytes()).buffer.asUint8List();
     img.Image oriImage = img.decodePng(imageBytes);
@@ -374,7 +373,7 @@ class _GeneratorState extends State<Generator> {
         imageToByteListFloat32(resizedImage).reshape([1, 4, 256, 256]);
 
     var totalTime = 0.0;
-    for (var i = 0; i < provider.epcho; i++) {
+    for (var i = 0; i < generatorProvider.epcho; i++) {
       var morParam = [i / 10, i / 10, i / 10].reshape([1, 3]);
       var inputs = [imgBytes, morParam];
       var output0 = List(1 * 4 * 256 * 256).reshape([1, 4, 256, 256]);
@@ -387,14 +386,14 @@ class _GeneratorState extends State<Generator> {
       totalTime += takeTime;
       print("Inference times:${i},took ${takeTime}s,totalTime:${totalTime}s");
 
-      provider.addJsonStr(morParam[0], output0);
+      generatorProvider.addJsonStr(morParam[0], output0);
     }
     // _interpreter.close();
 
-    await provider.writeFile(userId, animeId);
+    await generatorProvider.writeFile(userId, animeId);
 
-    provider.updateGenerateTag(userId, animeId);
-    provider.setGenerating();
+    generatorProvider.updateGenerateTag(userId, animeId);
+    generatorProvider.setGenerating();
   }
 
   Float32List imageToByteListFloat32(

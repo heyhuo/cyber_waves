@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cyber_waves/pages/SelectUploadModePage.dart';
+import 'package:cyber_waves/providers/PostItemProvider.dart';
 import 'package:cyber_waves/providers/UploadBtnProvider.dart';
 import 'package:cyber_waves/wigets/BottomBar.dart';
 import 'package:cyber_waves/wigets/MainWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  // var andIp="192.168.123.206";
+  var andIp="10.2.12.150";
 
   prefs.setBool("ifIOS", Platform.isIOS);
   prefs.setBool("ifPrd", false);
@@ -26,7 +30,7 @@ Future main() async {
   prefs.setString("scheme_ios_d", "http");
   prefs.setInt("ports_ios_d", 5000);
 
-  prefs.setString("urlPath_and_d", "10.0.2.2"); //10.0.2.2
+  prefs.setString("urlPath_and_d", andIp); //10.0.2.2
   prefs.setString("scheme_and_d", "http");
   prefs.setInt("ports_and_d", 8088);
 
@@ -39,6 +43,8 @@ Future main() async {
   //_loadModel(false);
 
   runApp(MyApp());
+  SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(statusBarColor:Colors.transparent);
+  SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
 }
 
 class MyApp extends StatelessWidget {
@@ -52,6 +58,7 @@ class MyApp extends StatelessWidget {
         primaryColorDark: Color(0xff3d6263), //綪御纳户566C73
         primaryColorLight: Color(0xff78C2C4),
         primaryColor: Color(0xffffffff),
+
       ),
       home: MyHomePage(),
     );
@@ -87,23 +94,25 @@ class _MyHomePageState extends State<MyHomePage> {
       body: MultiProvider(
           providers: [
             ChangeNotifierProvider(
-                create: (context) => UploadBtnProvider(false, ""))
+                create: (context) => UploadBtnProvider(false, "")),
+            ChangeNotifierProvider(
+                create: (context) => PostItemProvider())
           ],
           child: Stack(
             children: [
               /*抬头tab*/
               Positioned(
                   child: Container(
-                height: 100 * rpx,
+                height: 80 * rpx,
                 width: 750 * rpx,
-                color: Colors.black.withOpacity(0.5),
+                color: Theme.of(context).primaryColorLight,
               )),
               /*滚动列表*/
               Positioned(
                   child: Container(
-                margin: EdgeInsets.only(top: 100 * rpx),
+                margin: EdgeInsets.only(top: 80 * rpx),
                 width: 750 * rpx,
-                height: MediaQuery.of(context).size.height,
+                height: MediaQuery.of(context).size.height-180*rpx,
                 child: MainWidget(rpx: rpx),
               )),
               /*底部*/

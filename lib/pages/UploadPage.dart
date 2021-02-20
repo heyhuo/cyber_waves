@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
-import 'package:cyber_waves/providers/EditContentProvider.dart';
+import 'package:cyber_waves/providers/UploadPostItemProvider.dart';
+import 'package:cyber_waves/providers/WrapPicListProvider.dart';
 import 'package:cyber_waves/wigets/CloseBtn.dart';
 import 'package:cyber_waves/wigets/WrapPicList.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,9 @@ class _VideoUploadState extends State<VideoUpload> {
   var tagList = <Widget>[];
   var picList = List<String>();
   bool tagEditFlag;
-  EditContentProvider provider;
+  Uint8List selPic;
+  EditContentProvider picProvider;
+  WrapPicListProvider wrapProvider;
   ScrollController tagListscrollController = ScrollController();
 
   // Color screenPickerColor;
@@ -56,21 +60,23 @@ class _VideoUploadState extends State<VideoUpload> {
 
   @override
   Widget build(BuildContext context) {
-    provider = Provider.of<EditContentProvider>(context);
-    tagList = provider.tagList;
-    tagEditFlag = provider.tagTextField;
+    picProvider = Provider.of<EditContentProvider>(context);
+    wrapProvider = Provider.of<WrapPicListProvider>(context);
+    tagList = picProvider.tagList;
+    tagEditFlag = picProvider.tagTextField;
     screenHeight = MediaQuery.of(context).size.height;
-    picList = provider.picList;
+    picList = picProvider.picList;
+    selPic = wrapProvider.selPic;
 
     return Stack(
       children: [
         /*背景图*/
         Container(
           height: screenHeight, //MediaQuery.of(context).size.height,
-          child: picList.length == 0
+          child: selPic == null
               ? Text("")
-              : Image.asset(
-                  picList[0],
+              : Image.memory(
+                  selPic,
                   fit: BoxFit.fitHeight,
                 ),
         ),
@@ -137,24 +143,29 @@ class _VideoUploadState extends State<VideoUpload> {
                             // height: 80*rpx,
                             // color: Colors.red,
                             child: IconButton(
-                              onPressed: (){},
+                              onPressed: () {},
                               icon: Icon(
                                 Icons.arrow_circle_up_sharp,
                                 color: Colors.white,
                               ),
                             ),
                           ),
-                          Container(
-                              width: 80 * rpx,
-                              // margin: EdgeInsets.only(left: 0),
-                              // color: Colors.yellow,
-                              child: Text(
-                                "发布",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15),
-                              ))
+                          InkWell(
+                            onTap: (){
+                              picProvider.postData(wrapProvider.mulPicAssetList);
+                            },
+                            child: Container(
+                                width: 80 * rpx,
+                                // margin: EdgeInsets.only(left: 0),
+                                // color: Colors.yellow,
+                                child: Text(
+                                  "发布",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15),
+                                )),
+                          )
                         ],
                       ),
                     ),
@@ -234,11 +245,7 @@ class _VideoUploadState extends State<VideoUpload> {
               ),
 
               /*图片栏*/
-              WrapPicList(
-                provider,
-                rpx: rpx,
-                preview: true,
-              ),
+              WrapPicList(wrapProvider, picProvider, rpx),
             ],
           ),
         ),
@@ -288,12 +295,12 @@ class _VideoUploadState extends State<VideoUpload> {
                     // color: Colors.black,
                     child: Icon(
                       Icons.color_lens_outlined,
-                      color: provider.tagColor,
+                      color: picProvider.tagColor,
                     ),
                   ),
                   GestureDetector(
                     onTap: () {
-                      provider.setTagField();
+                      picProvider.setTagField();
                     },
                     child: CloseBtn(
                       rpx: rpx,
@@ -357,11 +364,11 @@ class _VideoUploadState extends State<VideoUpload> {
     return GestureDetector(
       onTap: () {
         if ("标签" == txt) {
-          provider.setTagField();
+          picProvider.setTagField();
         } else if ("召唤好友" == txt) {
-          provider.setFriendsField();
+          picProvider.setFriendsField();
         } else if ("添加音乐" == txt) {
-          provider.setMusicField();
+          picProvider.setMusicField();
         }
       },
       child: Container(
@@ -393,6 +400,8 @@ class _VideoUploadState extends State<VideoUpload> {
       ),
     );
   }
+
+
 
   _picCtn(imgPath) {
     return Hero(
@@ -436,7 +445,7 @@ class _VideoUploadState extends State<VideoUpload> {
   }
 
   Widget _atUser(avatarPath, userName) {
-    bool flag = provider.friendsField;
+    bool flag = picProvider.friendsField;
     return !flag
         ? Container()
         : Container(
@@ -558,8 +567,6 @@ class TagItem extends StatelessWidget {
   }
 }
 
-
-
 class ContentField extends StatefulWidget {
   const ContentField(
       {Key key,
@@ -638,22 +645,24 @@ class _ContentFieldState extends State<ContentField> {
               TextStyle(color: widget.hintColor, fontSize: widget.hintSize)),
       style: TextStyle(
         color: Colors.white,
-        fontStyle: FontStyle.italic,
+        // fontStyle: FontStyle.italic,
         letterSpacing: 4 * widget.rpx,
         fontSize: widget.conSize,
         height: 2.5 * widget.rpx,
       ),
       onChanged: (value) {
         this._keyword = value;
-        provider.setContent(this._keyword);
-        print(provider.content);
+        if ("content" == widget.tag) {
+          provider.setContent(this._keyword);
+          print(provider.content);
+        }
       },
       onEditingComplete: () {
         if ("tag" == widget.tag) {
           provider.addTag(TagItem(
             rpx: widget.rpx,
             tagName: this._keyword,
-            tagColor: Colors.greenAccent,
+            tagColor: Color(0xff78C2C4),
             provider: provider,
           ));
           this._keyword == "";
@@ -666,14 +675,12 @@ class _ContentFieldState extends State<ContentField> {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       focusNode: _focusNode,
-      textInputAction: TextInputAction.next,
+      // textInputAction: TextInputAction.next,
     );
 
     return txtField;
   }
 }
-
-
 
 class MusicCtn extends StatelessWidget {
   const MusicCtn({Key key, this.rpx}) : super(key: key);

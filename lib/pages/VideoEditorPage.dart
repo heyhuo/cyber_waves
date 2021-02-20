@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_editor/video_editor.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
-import 'VideoUploadPage.dart';
+import 'UploadPage.dart';
 
 void main() => runApp(MyApp());
 

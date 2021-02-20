@@ -163,7 +163,7 @@ class _BtmBarState extends State<BtmBar> {
     return Container(
       height: 100 * rpx,
       width: 750 * rpx,
-      color: Theme.of(context).primaryColorLight.withOpacity(0.5),
+      color: Theme.of(context).primaryColorLight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[

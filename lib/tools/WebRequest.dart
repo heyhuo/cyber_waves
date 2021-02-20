@@ -5,7 +5,7 @@ class WebRequest extends Object {
   bool ifPrd;
   bool ifIos;
 
-  Future<Uri> generate(String path, Map<String, dynamic> params) async {
+  Future<Uri> generate(String path, {Map<String, dynamic> params}) async {
     final prefs = await SharedPreferences.getInstance();
 
     String hosts;
@@ -40,7 +40,7 @@ class WebRequest extends Object {
         host: hosts,
         port: ports,
         path: path,
-        queryParameters: params);//
+        queryParameters: params); //
     return url;
   }
 }

@@ -34,8 +34,15 @@ dependencies:
   firebase_ml_vision: ^0.10.0
   firebase_core: ^0.7.0
   sprintf:
+  location: ^3.2.4
   vibrate: ^0.0.4
   http: ^0.12.2
+  http_parser: ^3.1.4
+  date_format: ^1.0.9
+  transparent_image: ^1.0.0
+  dio: ^3.0.10
+  audioplayers: ^0.17.3
+  pull_to_refresh: ^1.6.3
   camera: ^0.5.8+1
   path: ^1.7.0
   path_provider: ^1.6.24
@@ -68,6 +75,8 @@ dependencies:
   json_serializable: ^3.5.1
   flutter_absolute_path: ^1.0.6
   flutter_blurhash: ^0.5.0
+  google_fonts: ^1.1.2
+  inview_notifier_list: ^1.0.0
 #  image_crop: ^0.3.4
   image_slider: ^1.0.2
   image_editor: ^0.7.3
@@ -99,12 +108,12 @@ flutter:
     - assets/images/
 #    - assets/riv/
     - assets/gif/
-    - assets/poser_img/haru/
-    - assets/poser_img/rize/
-    - assets/poser_img/sakura/
-    - assets/poser_img/higu/
-    - assets/poser_img/hosh/
-    - assets/poser_img/mito/
+#    - assets/poser_img/haru/
+#    - assets/poser_img/rize/
+#    - assets/poser_img/sakura/
+#    - assets/poser_img/higu/
+#    - assets/poser_img/hosh/
+#    - assets/poser_img/mito/
     - assets/waifus/
 
   # An image asset can refer to one or more resolution-specific "variants", see
