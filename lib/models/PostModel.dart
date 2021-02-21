@@ -23,7 +23,7 @@ class PostModel extends Object {
   DateTime updateTime;
 
   PostModel(
-      this.userId,
+      {this.userId,
       this.postId,
       this.content,
       this.picBasePath,
@@ -35,7 +35,7 @@ class PostModel extends Object {
       this.latitude,
       this.longitude,
       this.postsLocation,
-      {this.readNum = 0,
+      this.readNum = 0,
       this.likeNum = 0,
       this.commentNum = 0,
       this.createTime,

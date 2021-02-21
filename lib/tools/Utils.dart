@@ -1,7 +1,8 @@
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
-class Utils extends Object{
-
+import 'package:image/image.dart' as img;
+class Utils extends Object {
   Utils();
 
   //fileExt 文件后缀名
@@ -46,19 +47,29 @@ class Utils extends Object{
     return null;
   }
 
-
- static getFormatDateTimeNow(rex, {type = "Date"}) {
+  static getFormatDateTimeNow(rex, {type = "Date"}) {
     var dateString = DateFormat(rex).format(DateTime.now());
     if (type == "Date") return DateTime.parse(dateString);
     return dateString;
   }
 
-  static String getMusicId(url){
-  url.startsWith("song");
-  int start = url.indexOf("song");
-  int end = url.indexOf("user");
-  var musicId = url.substring(start + 5, end - 2);
-  return musicId;
+  static String getMusicId(url) {
+    if (url == null) return null;
+    url.startsWith("song");
+    int start = url.indexOf("song");
+    int end = url.indexOf("user");
+    var musicId = url.substring(start + 5, end - 2);
+    return musicId;
   }
 
+ static String getImageBlurhash(List<int> imageData) {
+    img.Image image = img.decodeImage(imageData.toList());
+    img.Image thumbnail = img.copyResize(image, width: 100,height: 100);
+    final blurHash = encodeBlurHash(
+      thumbnail.getBytes(format: img.Format.rgba),
+      thumbnail.width,
+      thumbnail.height,
+    );
+    return blurHash;
+  }
 }

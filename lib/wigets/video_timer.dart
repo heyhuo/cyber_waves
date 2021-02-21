@@ -50,11 +50,12 @@ class VideoTimerState extends State<VideoTimer> {
             children: <Widget>[
               Icon(
                 Icons.fiber_manual_record,
-                size: 14.0,
+                size: 16.0,
                 color: Colors.red,
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 1.0, right: 1.0),
+                padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+
                 child: Text(
                   timeFormatter(Duration(seconds: _start)),
                   style: TextStyle(fontSize: 16.0, color: Colors.white),

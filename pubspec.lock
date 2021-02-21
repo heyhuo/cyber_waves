@@ -57,6 +57,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.0.6"
+  blurhash_dart:
+    dependency: "direct main"
+    description:
+      name: blurhash_dart
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.3"
   boolean_selector:
     dependency: transitive
     description:

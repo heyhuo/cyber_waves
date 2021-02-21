@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cyber_waves/models/PostModel.dart';
 import 'package:cyber_waves/pages/UploadPage.dart';
 import 'package:cyber_waves/tools/Utils.dart';
 import 'package:cyber_waves/tools/WebRequest.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img; // for demo purposes
 
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -13,7 +15,13 @@ import 'package:dio/dio.dart';
 
 class UploadPostItemProvider extends ChangeNotifier {
   var tagList = <Widget>[];
-  var musicPath, content, selPicIdx=0,thumbPath, latitude, longitude, location;
+  var musicPath,
+      content,
+      selPicIdx = 0,
+      thumbPath,
+      latitude,
+      longitude,
+      location;
   var picList = List<String>();
   var video;
   bool tagTextField = false;
@@ -32,7 +40,7 @@ class UploadPostItemProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setMusicPath(url){
+  setMusicPath(url) {
     this.musicPath = url;
     notifyListeners();
   }
@@ -97,7 +105,7 @@ class UploadPostItemProvider extends ChangeNotifier {
     }
 
     var postPicList = List<String>();
-    int idx=0;
+    int idx = 0;
     for (Asset pic in picList) {
       var picInfo = {
         "name": pic.name,
@@ -106,12 +114,15 @@ class UploadPostItemProvider extends ChangeNotifier {
       };
       postPicList.add(json.encode(picInfo));
 
-      if(idx++==selPicIdx){
-        thumbPath = pic.name;
-      }
-
       ByteData byteData = await pic.getByteData();
       List<int> imageData = byteData.buffer.asUint8List();
+
+      if (idx++ == selPicIdx) {
+        // thumbPath = pic.name;
+        thumbPath = Utils.getImageBlurhash(imageData);
+        print("blurHash:$thumbPath");
+      }
+
       MultipartFile multipartFile = new MultipartFile.fromBytes(imageData,
           filename: pic.name,
           contentType: Utils.getMediaType("." + pic.name.split('.')[1]));
@@ -124,18 +135,18 @@ class UploadPostItemProvider extends ChangeNotifier {
     var dateTimeNow = Utils.getFormatDateTimeNow(dateTimeRex);
     var userId = "admin";
     PostModel postModel = new PostModel(
-        userId,
-        Uuid().v4().toString(),
-        content,
-        "upload/$dateStr/$userId/",
-        json.encode(postPicList),
-        json.encode(tags),
-        thumbPath,
-        json.encode([]),
-        musicPath,
-        latitude,
-        longitude,
-        location,
+        userId: userId,
+        postId: Uuid().v4().toString(),
+        content: content,
+        picBasePath: "upload/$dateStr/$userId/",
+        picPathList: json.encode(postPicList),
+        tagList: json.encode(tags),
+        thumbPath: thumbPath,
+        atUserList: json.encode([]),
+        musicPath: musicPath,
+        latitude: latitude,
+        longitude: longitude,
+        postsLocation: location,
         createTime: dateTimeNow,
         updateTime: dateTimeNow);
 

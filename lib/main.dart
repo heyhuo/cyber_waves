@@ -16,8 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  // var andIp="192.168.123.206";
-  var andIp="10.2.12.150";
+  var andIp="192.168.123.206";
+  // var andIp="10.2.12.150";
 
   prefs.setBool("ifIOS", Platform.isIOS);
   prefs.setBool("ifPrd", false);

@@ -7,6 +7,7 @@ import 'package:cyber_waves/tools/WebRequest.dart';
 import 'package:cyber_waves/tools/WidgetHelper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -85,6 +86,7 @@ class _RefreshPageState extends State<RefreshPage> {
   @override
   Widget build(BuildContext context) {
     postList = provider.postList;
+
     return SmartRefresher(
       controller: _refreshController,
       // enablePullUp: true,
