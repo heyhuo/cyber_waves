@@ -8,13 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
 class MusicProvider with ChangeNotifier {
-  var playMusicApi = 'http://music.163.com/song/media/outer/url?id=';
+  var playMusicApi = 'https://music.163.com/song/media/outer/url?id=';
   var songId;
   var dio = new Dio();
   MusicModel musicModel;
   bool isGetInfo=false;
-
-
   var api = "https://api.imjad.cn/cloudmusic/";
 
   MusicProvider();
@@ -50,15 +48,20 @@ class MusicProvider with ChangeNotifier {
     var artistInfo = songInfo["ar"][0];
     var albumInfo = songInfo["al"];
     musicModel = new MusicModel(
-        songInfo["id"].toString(),
-        songInfo["name"],
-        artistInfo["id"].toString(),
-        artistInfo["name"],
-        albumInfo["id"].toString(),
-        albumInfo["name"],
-        albumInfo["picUrl"]);
+       musicId: songInfo["id"].toString(),
+        musicName:songInfo["name"],
+        artistId:artistInfo["id"].toString(),
+        artistName:artistInfo["name"],
+        albumId:albumInfo["id"].toString(),
+        albumName:albumInfo["name"],
+        albumPicUrl:albumInfo["picUrl"]);
     print("解析地址：${musicModel.toJson()}");
     setIsGetInfo();
+/*
+   musicModel =new MusicModel(
+    musicId: songId,musicName: "测试",albumName: "专辑",
+     albumPicUrl: "",artistName: "歌手"
+    );*/
     notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cyber_waves/pages/MakerPage.dart';
 import 'package:cyber_waves/pages/Pace.dart';
 import 'package:cyber_waves/pages/SelectUploadModePage.dart';
+import 'package:cyber_waves/pages/UserHomePage.dart';
 import 'package:cyber_waves/providers/CameraProvider.dart';
 import 'package:cyber_waves/providers/FaceCameraProvider.dart';
 import 'package:cyber_waves/providers/PostsGalleryProvider.dart';
@@ -90,16 +91,16 @@ class _BtmBarState extends State<BtmBar> {
         // Navigator.pushAndRemoveUntil(
         //     context,
         //     MaterialPageRoute(
-        //         builder: (context) => MultiProvider(
-        //                 providers: [
-        //                   ChangeNotifierProvider(
-        //                     create: (context) => PostsGalleryProvider(),
-        //                   )
-        //                 ],
-        //                 child: PaceMain(
-        //                   selIndex: index,
-        //                 ))),
+        //         builder: (context) => MultiProvider(providers: [
+        //               // ChangeNotifierProvider(
+        //               //   create: (context) => PostsGalleryProvider(),
+        //               // )
+        //             ], child: UserHomePage())),
         //     ModalRoute.withName("/pace"));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => UserHomePage()));
         break;
 
       /*底部菜单滑出界面*/
@@ -149,8 +150,10 @@ class _BtmBarState extends State<BtmBar> {
         //         ),
         //       );
         //     });
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => SelectUploadPage(rpx:rpx)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => SelectUploadPage(rpx: rpx)));
         break;
 
       default:
@@ -171,7 +174,7 @@ class _BtmBarState extends State<BtmBar> {
             tapItem(0);
           }),
           AddIcon(),
-          getBtmTextWiget(context, "潜行", selected[1], () {
+          getBtmTextWiget(context, "我的", selected[1], () {
             tapItem(1);
           })
         ],

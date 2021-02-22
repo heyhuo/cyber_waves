@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 part 'PostsModel.g.dart';
-// flutter packages pub run build_runner build
+// flutter packages pub run build_runner build --delete-conflicting-outputs
 @JsonSerializable()
 class PostsModel extends Object{
   String postsID;

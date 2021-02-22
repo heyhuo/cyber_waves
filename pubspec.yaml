@@ -50,6 +50,7 @@ dependencies:
   #  image_gallery_saver: ^1.6.7
   #  image_picker_saver: ^0.3.0
   uuid: ^2.2.2
+  after_layout: ^1.0.7+2
   flutter_screen_recording:
     git:
       ref: video_size

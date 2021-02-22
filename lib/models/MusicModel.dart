@@ -13,8 +13,12 @@ class MusicModel extends Object {
  String albumPicUrl;
 
 
- MusicModel(this.musicId, this.musicName, this.artistId, this.artistName,
-      this.albumId, this.albumName, this.albumPicUrl);
+ MusicModel({this.musicId, this.musicName,
+      this.artistId,
+      this.artistName,
+      this.albumId,
+      this.albumName,
+      this.albumPicUrl});
 
   factory MusicModel.fromJson(Map<String, dynamic> json) =>
       _$MusicModelFromJson(json);

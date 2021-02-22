@@ -1,5 +1,4 @@
-import 'dart:io';
-import 'dart:math';
+
 import 'dart:typed_data';
 
 import 'package:cyber_waves/models/MusicModel.dart';
@@ -12,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
+
+import 'MyHomePage.dart';
 
 // class UploadPage extends StatefulWidget {
 //   const UploadPage({Key key}) : super(key: key);
@@ -137,34 +138,35 @@ class _UploadPageState extends State<UploadPage> {
                           ],
                         ),
                       ),
-                      trailing: Container(
-                        width: 160 * rpx,
-                        height: 74 * rpx,
-                        decoration: BoxDecoration(
-                            color: Colors.green.shade600.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(20.0)),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Container(
-                              width: 60 * rpx,
-                              // height: 80*rpx,
-                              // color: Colors.red,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
+                      trailing: InkWell(
+                        onTap: () {
+                          picProvider.postData(wrapProvider.mulPicAssetList);
+                          // Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MyHomePage()));
+                        },
+                        child: Container(
+                          width: 160 * rpx,
+                          height: 74 * rpx,
+                          decoration: BoxDecoration(
+                              color: Colors.green.shade600.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Container(
+                                width: 60 * rpx,
+                                // height: 80*rpx,
+                                // color: Colors.red,
+                                child: Icon(
                                   Icons.arrow_circle_up_sharp,
                                   color: Colors.white,
                                 ),
                               ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                picProvider
-                                    .postData(wrapProvider.mulPicAssetList);
-                              },
-                              child: Container(
+                              Container(
                                   width: 80 * rpx,
                                   // margin: EdgeInsets.only(left: 0),
                                   // color: Colors.yellow,
@@ -175,8 +177,8 @@ class _UploadPageState extends State<UploadPage> {
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15),
                                   )),
-                            )
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -8,13 +8,13 @@ part of 'MusicModel.dart';
 
 MusicModel _$MusicModelFromJson(Map<String, dynamic> json) {
   return MusicModel(
-    json['musicId'] as String,
-    json['musicName'] as String,
-    json['artistId'] as String,
-    json['artistName'] as String,
-    json['albumId'] as String,
-    json['albumName'] as String,
-    json['albumPicUrl'] as String,
+    musicId: json['musicId'] as String,
+    musicName: json['musicName'] as String,
+    artistId: json['artistId'] as String,
+    artistName: json['artistName'] as String,
+    albumId: json['albumId'] as String,
+    albumName: json['albumName'] as String,
+    albumPicUrl: json['albumPicUrl'] as String,
   );
 }
 

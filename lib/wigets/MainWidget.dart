@@ -5,6 +5,7 @@ import 'package:cyber_waves/providers/MusicProvider.dart';
 import 'package:cyber_waves/providers/PostItemProvider.dart';
 import 'package:cyber_waves/tools/WebRequest.dart';
 import 'package:cyber_waves/tools/WidgetHelper.dart';
+import 'package:cyber_waves/wigets/CameraMain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -30,7 +31,6 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     rpx = widget.rpx;
   }
@@ -39,21 +39,7 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     postItemProvider = Provider.of<PostItemProvider>(context);
     musicProvider = Provider.of<MusicProvider>(context);
-    // postItemProvider.getPostItemList(1);
     return RefreshPage(provider: postItemProvider);
-  }
-
-  _getUserContentList() async {
-    await postItemProvider.getPostItemList();
-
-    // return List.generate(
-    //   5,
-    //   (index) => GestureDetector(
-    //     child: UserContentItem(
-    //       rpx: rpx,
-    //     ),
-    //   ),
-    // );
   }
 }
 
@@ -72,10 +58,11 @@ class _RefreshPageState extends State<RefreshPage> {
   ScrollController controller;
   bool ifLoading = false;
   RefreshController _refreshController;
+  ListView _itemListWidget;
+  double rpx;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     provider = widget.provider;
     controller = ScrollController();
@@ -83,159 +70,168 @@ class _RefreshPageState extends State<RefreshPage> {
     provider.getPostItemList();
   }
 
+  _setItemListWidget() {
+    var list = ListView.builder(
+        controller: controller,
+        shrinkWrap: true,
+        itemCount: postList.length,
+        itemBuilder: (context, index) {
+          return PostItem(
+              postModel: postList[index], provider: provider, rpx: rpx);
+        });
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     postList = provider.postList;
+    //_setItemListWidget();
+    rpx = MediaQuery.of(context).size.width / 750;
 
     return SmartRefresher(
-      controller: _refreshController,
-      // enablePullUp: true,
-      enablePullDown: true,
-      header: BezierCircleHeader(
-        bezierColor: Theme.of(context).primaryColorLight,
-        circleColor: Colors.yellowAccent,
-        circleType: BezierCircleType.Progress,
-      ),
-      footer: CustomFooter(
-        builder: (BuildContext context, LoadStatus mode) {
-          Widget body;
-          if (mode == LoadStatus.idle) {
-            body = Text("pull up load");
-          } else if (mode == LoadStatus.loading) {
-            body = CupertinoActivityIndicator();
-          } else if (mode == LoadStatus.failed) {
-            body = Text("Load Failed!Click retry!");
-          } else {
-            body = Text("已经见底了~");
-          }
-          return Container(
-            height: 55.0,
-            child: Center(child: body),
-          );
-        },
-      ),
-      onLoading: _onLoading,
-      onRefresh: _onRefresh,
-      child: ListView.builder(
-          // controller: controller,
-          // shrinkWrap: true,
-          itemCount: postList.length,
-          itemBuilder: (context, index) {
-            return UserContentItem(postList[index], provider);
-          }),
-    );
+        controller: _refreshController,
+        enablePullUp: true,
+        enablePullDown: true,
+        header: BezierCircleHeader(
+          bezierColor: Theme.of(context).primaryColorLight,
+          circleColor: Colors.yellowAccent,
+          circleType: BezierCircleType.Progress,
+        ),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            Widget body;
+            if (mode == LoadStatus.idle) {
+              body = Text("pull up load");
+            } else if (mode == LoadStatus.loading) {
+              body = CircularProgressIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("Load Failed!Click retry!");
+            } else {
+              body = Text("已经见底了~");
+            }
+            return Container(
+              height: 55.0,
+              child: Center(child: body),
+            );
+          },
+        ),
+        onLoading: _onLoading,
+        onRefresh: _onRefresh,
+        child: (postList == null || postList.length == 0)
+            ? Container(
+                // color: Colors.yellowAccent,
+                child: Column(
+                children: [
+                  // CircularProgressIndicator(),
+                  // Icon(Icons.phonelink_erase_rounded),
+                  // Text("暂无数据"),
+                ],
+              ))
+            : _setItemListWidget());
   }
 
   void _onRefresh() async {
+    provider.page = 1;
     provider.getPostItemList(ifRefresh: true);
+    // _setItemListWidget();
     _refreshController.refreshCompleted();
   }
 
   void _onLoading() async {
     // await Future.delayed(Duration(milliseconds: 500));
+    provider.page++;
     provider.getPostItemList();
     _refreshController.loadComplete();
   }
 }
 
-class UserContentItem extends StatefulWidget {
-  const UserContentItem(this.postModel, this.provider, {Key key})
+class PostItem extends StatelessWidget {
+  const PostItem({Key key, this.postModel, this.provider, this.rpx})
       : super(key: key);
   final PostModel postModel;
   final PostItemProvider provider;
-
-  @override
-  _UserContentItemState createState() => _UserContentItemState();
-}
-
-class _UserContentItemState extends State<UserContentItem> {
-  PostModel postModel;
-  double rpx;
-  var ipPortBasePath;
-  PostItemProvider provider;
-
-  // VideoPlayerController _controller;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    postModel = widget.postModel;
-    provider = widget.provider;
-  }
+  final double rpx;
 
   @override
   Widget build(BuildContext context) {
-    ipPortBasePath = "${provider.ipPort}/static/${postModel.picBasePath}/";
-    rpx = MediaQuery.of(context).size.width / 750;
+    var ipPortBasePath = "${provider.ipPort}/static/${postModel.picBasePath}/";
+    // rpx = MediaQuery.of(context).size.width / 750;
     bool isVedio = false;
-    return Container(
-      /*背景图*/
-      decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          image: DecorationImage(
-              image: NetworkImage("$ipPortBasePath${postModel.thumbPath}",
-                  scale: 0.01),
-              fit: BoxFit.fitWidth)),
-      width: 750 * rpx,
-      child: Container(
-        color: Colors.black.withOpacity(0.6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //头像
-            _getUserAvatar(),
-
-            //内容
-            Container(
-              width: 600 * rpx,
-              // color: Colors.brown,
-              margin: EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  /*用户名*/
-                  Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 600 * rpx,
-                            // color: Colors.blue,
-                            child: Text(
-                              postModel.userId,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  /*标签*/
-                  Container(
-                    child: Row(children: _getTagList(postModel.tagList)),
-                  ),
-                  /*内容*/
-                  Container(
-                      width: 600 * rpx,
-                      // color: Colors.white54.withOpacity(0.2),
-                      padding: EdgeInsets.only(right: 10 * rpx),
-                      margin: EdgeInsets.only(top: 10 * rpx),
-                      child: Container(
-                          child: Text(
-                        postModel.content,
-                        style: TextStyle(color: Colors.white, letterSpacing: 3),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 5,
-                      ))),
-                  /*网格图片*/
-                  _getUserGridViewPics(postModel.picPathList),
-                ],
-              ),
-            )
-          ],
+    var ratio = 1.8;
+    return Stack(
+      children: [
+        //背景图
+        Center(
+          child: AspectRatio(
+            aspectRatio: ratio,
+            child: BlurHash(hash: postModel.thumbPath),
+          ),
         ),
-      ),
+
+        Container(
+          color: Colors.black.withOpacity(0.3),
+          child: AspectRatio(
+              aspectRatio: ratio,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //头像
+                  _getUserAvatar(),
+                  //内容
+                  Container(
+                    width: 600 * rpx,
+                    // color: Colors.brown,
+                    margin: EdgeInsets.all(10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        /*用户名*/
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 600 * rpx,
+                                  // color: Colors.blue,
+                                  child: Text(
+                                    postModel.userId,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        /*标签*/
+                        Container(
+                          child: Row(children: _getTagList(postModel.tagList)),
+                        ),
+                        /*内容*/
+                        Container(
+                            width: 600 * rpx,
+                            // color: Colors.white54.withOpacity(0.2),
+                            padding: EdgeInsets.only(right: 10 * rpx),
+                            margin: EdgeInsets.only(top: 10 * rpx),
+                            child: Container(
+                                child: Text(
+                              postModel.content,
+                              style: TextStyle(
+                                  color: Colors.white, letterSpacing: 3),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 5,
+                            ))),
+                        /*网格图片*/
+                        _getUserGridViewPics(
+                            ipPortBasePath, postModel.picPathList),
+                      ],
+                    ),
+                  )
+                ],
+              )),
+        ),
+      ],
+      // ),
+      // ),
     );
   }
 
@@ -288,7 +284,7 @@ class _UserContentItemState extends State<UserContentItem> {
       clipBehavior: Clip.antiAlias,
       child: FadeInImage.memoryNetwork(
         placeholder: kTransparentImage,
-        image: "$ipPortBasePath${picPath}",
+        image: picPath,
         fit: BoxFit.fitWidth,
       ),
     )
@@ -316,7 +312,7 @@ class _UserContentItemState extends State<UserContentItem> {
   }
 
   /* 获取网格图片组件 */
-  Widget _getUserGridViewPics(picPathList) {
+  Widget _getUserGridViewPics(ipPortBasePath, picPathList) {
     var pathList = json.decode(picPathList);
     var userId = postModel.userId;
     return GridView.count(
@@ -331,8 +327,35 @@ class _UserContentItemState extends State<UserContentItem> {
       // childAspectRatio: 1.0,
       children: List.generate(pathList.length, (index) {
         var picPath = json.decode(pathList[index])["name"];
-        return _getGridPic(picPath);
+        return _getGridPic(ipPortBasePath + picPath);
       }),
     );
   }
 }
+
+// class UserContentItem extends StatefulWidget {
+//   const UserContentItem(this.postModel, this.provider, {Key key})
+//       : super(key: key);
+//   final PostModel postModel;
+//   final PostItemProvider provider;
+//
+//   @override
+//   _UserContentItemState createState() => _UserContentItemState();
+// }
+//
+// class _UserContentItemState extends State<UserContentItem> {
+//   PostModel postModel;
+//   double rpx;
+//   var ipPortBasePath;
+//   PostItemProvider provider;
+//
+//   // VideoPlayerController _controller;
+//
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     postModel = widget.postModel;
+//     provider = widget.provider;
+//   }
+// }

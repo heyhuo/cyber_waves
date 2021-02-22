@@ -16,24 +16,19 @@ class PostItemProvider with ChangeNotifier {
 
   /* 获取动态数据 */
   Future getPostItemList({ifRefresh = false}) async {
-    int pageNum;
-    if(ifRefresh){
-      pageNum=1;
-      postList.clear();
-    }else{
-      pageNum = ++page;
-    }
-    if(ipPort==null){
-     var u= await webRequest.generate("");
-     ipPort = u.toString();
+
+    if (ipPort == null) {
+      var u = await webRequest.generate("");
+      ipPort = u.toString();
     }
     var apiUrl = "$ipPort/$baseUrl/getPostItemList";
     var response = await dio.request(apiUrl,
-        data: {"page": pageNum, "size": this.size},
+        data: {"page": page, "size": this.size},
         options: Options(method: "POST"));
     // print(response);
     var list = List<PostModel>(); //List.castFrom(response.data["result"]);
     var t = response.data["result"];
+    if (ifRefresh) postList.clear();
     var idx = postList.length;
     for (var obj in t) {
       list.add(PostModel.fromJson(obj));

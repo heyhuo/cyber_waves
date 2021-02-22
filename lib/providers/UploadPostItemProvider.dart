@@ -32,11 +32,17 @@ class UploadPostItemProvider extends ChangeNotifier {
   Dio dio = Dio();
   var dateTimeRex = "yyyy-MM-dd HH:mm:ss";
   var dateRex = "yyyyMMdd";
+  var isUploading=false;
 
   UploadPostItemProvider();
 
   setSelPicIdx(idx) {
     selPicIdx = idx;
+    notifyListeners();
+  }
+
+  setIsUploading(){
+    isUploading=!isUploading;
     notifyListeners();
   }
 
@@ -89,6 +95,7 @@ class UploadPostItemProvider extends ChangeNotifier {
   Future postData(
     picList,
   ) async {
+    setIsUploading();
     List<MultipartFile> imageList = new List<MultipartFile>();
 
     var dateStr = Utils.getFormatDateTimeNow(dateRex, type: "String");
@@ -107,8 +114,11 @@ class UploadPostItemProvider extends ChangeNotifier {
     var postPicList = List<String>();
     int idx = 0;
     for (Asset pic in picList) {
+      var fileType="." + pic.name.split('.')[1];
+      var fileName = Uuid().v4().toString()+fileType;
+
       var picInfo = {
-        "name": pic.name,
+        "name": fileName,//pic.name,
         "w": pic.originalWidth,
         "h": pic.originalHeight
       };
@@ -124,8 +134,8 @@ class UploadPostItemProvider extends ChangeNotifier {
       }
 
       MultipartFile multipartFile = new MultipartFile.fromBytes(imageData,
-          filename: pic.name,
-          contentType: Utils.getMediaType("." + pic.name.split('.')[1]));
+          filename: fileName,//pic.name,
+          contentType: Utils.getMediaType(fileType));
 
       imageList.add(multipartFile);
       // print("图片数据：$imageData");
@@ -159,5 +169,6 @@ class UploadPostItemProvider extends ChangeNotifier {
         onSendProgress: (int sent, int total) {
       print("发送：$sent,总计：$total");
     });
+    setIsUploading();
   }
 }
