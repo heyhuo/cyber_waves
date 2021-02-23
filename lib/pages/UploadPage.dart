@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-import 'MyHomePage.dart';
+import 'HomeMainPage.dart';
 
 // class UploadPage extends StatefulWidget {
 //   const UploadPage({Key key}) : super(key: key);
@@ -145,7 +145,7 @@ class _UploadPageState extends State<UploadPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MyHomePage()));
+                                  builder: (context) => HomeMainPage()));
                         },
                         child: Container(
                           width: 160 * rpx,

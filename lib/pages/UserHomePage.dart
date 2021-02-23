@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:after_layout/after_layout.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +38,7 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
   double extraPicHeight = 0;
   BoxFit fitType;
   double prevDy;
-  double expandedHeight=300;
+  double expandedHeight = 200;
 
   AnimationController animationController;
   Animation<double> anim, bgAnim;
@@ -70,9 +72,9 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
     });
   }
 
-  updateExpandedHeight(height){
+  updateExpandedHeight(height) {
     setState(() {
-      expandedHeight=height;
+      expandedHeight = height;
     });
   }
 
@@ -98,19 +100,21 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Listener(
       onPointerMove: (movePointEvent) {
-        updatePicHeight(movePointEvent.position.dy);
-        // print(movePointEvent.position);
+        print(movePointEvent.position.dy);
+        // updatePicHeight(movePointEvent.position.dy);
       },
       onPointerUp: (_) {
-        runAnimate();
-        animationController.forward(from: 0);
+        // runAnimate();
+        // animationController.forward(from: 0);
       },
       child: CustomScrollView(
-        physics: ClampingScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
             pinned: true,
-            floating: true,
+            // snap: true,
+            // floating: true,
+            stretch: true,
             actions: [
               IconButton(
                   icon: Icon(
@@ -140,9 +144,12 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
                   ],
                 )),
             expandedHeight: expandedHeight + extraPicHeight,
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.black.withOpacity(0.6),
             flexibleSpace: FlexibleSpaceBar(
+              // title: CircleAvatar(backgroundColor: Colors.blue,),
+              stretchModes: [StretchMode.zoomBackground],
               background: TopBarWithCallback(
+                expandedHeight: expandedHeight,
                 extraPicHeight: extraPicHeight,
                 fitType: fitType,
                 bgAnim: bgAnim,
@@ -154,7 +161,9 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
               delegate: SliverChildBuilderDelegate((context, index) {
             return Container(
               height: 30,
-              color: Colors.white,
+              color: Colors.blue,
+              child:
+                  Text(index.toString(), style: TextStyle(color: Colors.white)),
             );
           }, childCount: 80))
         ],
@@ -166,43 +175,49 @@ class _UserHomeState extends State<UserHome> with TickerProviderStateMixin {
 class UserSliverTopBar extends StatelessWidget {
   const UserSliverTopBar(
       {Key key,
+      @required this.expandedHeight,
       @required this.extraPicHeight,
       @required this.fitType,
       @required this.bgAnim})
       : super(key: key);
 
   final double extraPicHeight;
+  final double expandedHeight;
   final BoxFit fitType;
   final Animation<double> bgAnim;
 
   @override
   Widget build(BuildContext context) {
     double rpx = MediaQuery.of(context).size.width / 750;
+    var bgHeight = max(300 * rpx + extraPicHeight, 0).toDouble();
     return Stack(
       children: [
+        //背景图
+        Container(
+          height: expandedHeight,
+          // decoration: BoxDecoration(color: Colors.blue),
+          child: Stack(
+            children: [
+              Image.asset(
+                "assets/images/bg1.jpg",
+                width: 750 * rpx,
+                height: expandedHeight+extraPicHeight,
+                fit: BoxFit.fitHeight,
+              ),
+              Container(
+                color: Colors.black.withOpacity(0.6), //- bgAnim.value
+              ),
+            ],
+          ),
+        ),
         Column(
           children: [
-            //背景图
-            Container(
-              height: 300 * rpx + extraPicHeight,
-              // decoration: BoxDecoration(color: Colors.blue),
-              child: Stack(
-                children: [
-                  Image.asset(
-                    "assets/images/bg4.jpg",
-                    width: 750 * rpx,
-                    height: 300 * rpx + extraPicHeight,
-                    fit: fitType,
-                  ),
-                  Container(
-                    color: Colors.black.withOpacity(0.4 ),//- bgAnim.value
-                  ),
-                ],
-              ),
+            SizedBox(
+              height: 210 * rpx,
             ),
             //信息
             Container(
-              padding: EdgeInsets.only(top: 20 * rpx),
+              // padding: EdgeInsets.only(top: 20 * rpx),
               height: 120 * rpx,
               // color: Colors.yellowAccent,
               child: Row(
@@ -262,8 +277,8 @@ class UserSliverTopBar extends StatelessWidget {
                     "黑火的柠檬🍋",
                     style: TextStyle(
                         color: Colors.white,
-                        fontSize: 40 * rpx,
-                        letterSpacing: 3*rpx,
+                        fontSize: 35 * rpx,
+                        letterSpacing: 3 * rpx,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
@@ -273,12 +288,8 @@ class UserSliverTopBar extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
-              child: Divider(
-                color: Colors.grey[700],
-              ),
-            ),
+            CutLine(),
+            //橱窗
             Visibility(
               visible: false,
               child: Container(
@@ -289,7 +300,8 @@ class UserSliverTopBar extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.store_outlined, color: Color(0xffeacd3f)),
-                        Text("商品橱窗", style: TextStyle(color: Color(0xffeacd3f))),
+                        Text("商品橱窗",
+                            style: TextStyle(color: Color(0xffeacd3f))),
                       ],
                     ),
                     Icon(
@@ -300,24 +312,17 @@ class UserSliverTopBar extends StatelessWidget {
                 ),
               ),
             ),
-            Visibility(
-              visible: false,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
-                child: Divider(
-                  color: Colors.grey[700],
-                ),
-              ),
-            ),
+
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
+              padding: EdgeInsets.symmetric(horizontal: 30 * rpx),
               height: 100 * rpx,
               width: 750 * rpx,
               child: Text(
                 "大数据爱哦的撒娇的三大打算\n大鸡排的飒飒就嗲",
-                style: TextStyle(color: Colors.white, fontSize: 30 * rpx),
+                style: TextStyle(color: Colors.white, fontSize: 25 * rpx),
               ),
             ),
+
             Container(
               padding: EdgeInsets.symmetric(
                   horizontal: 20 * rpx, vertical: 10 * rpx),
@@ -328,9 +333,11 @@ class UserSliverTopBar extends StatelessWidget {
                 ],
               ),
             ),
+            // CutLine(),
             Container(
+              // color: Colors.yellowAccent,
               padding: EdgeInsets.symmetric(
-                  horizontal: 20 * rpx, vertical: 20 * rpx),
+                  horizontal: 20 * rpx, vertical: 10 * rpx),
               child: Row(
                 children: [
                   NumWithDesc(numStr: "100.2w", descStr: "获赞"),
@@ -338,22 +345,22 @@ class UserSliverTopBar extends StatelessWidget {
                   NumWithDesc(numStr: "6.2w", descStr: "粉丝"),
                 ],
               ),
-            )
+            ),
           ],
         ),
         Positioned(
-          top: 230 * rpx + extraPicHeight,
+          top: 180 * rpx + extraPicHeight,
           left: 20 * rpx,
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                width: 10 * rpx,
-                color: Colors.black, //Color.fromARGB(128, 219, 48, 85),
+                width: 5 * rpx,
+                color: Colors.white, //Color.fromARGB(128, 219, 48, 85),
               ),
             ),
-            width: 190 * rpx,
-            height: 190 * rpx,
+            width: 150 * rpx,
+            height: 150 * rpx,
             child: CircleAvatar(
               backgroundImage: AssetImage("assets/images/avatar1.jpeg"),
             ),
@@ -379,7 +386,7 @@ class TagItem extends StatelessWidget {
           color: Color(0xff3b3c49)),
       child: Text(
         text,
-        style: TextStyle(fontSize: 24 * rpx, color: Colors.grey),
+        style: TextStyle(fontSize: 20 * rpx, color: Colors.white),
       ),
     );
   }
@@ -401,7 +408,7 @@ class NumWithDesc extends StatelessWidget {
           Text(
             numStr,
             style: TextStyle(
-                fontSize: 40 * rpx,
+                fontSize: 30 * rpx,
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
           ),
@@ -410,7 +417,7 @@ class NumWithDesc extends StatelessWidget {
           ),
           Text(descStr,
               style: TextStyle(
-                  fontSize: 35 * rpx,
+                  fontSize: 25 * rpx,
                   color: Colors.grey[500],
                   fontWeight: FontWeight.bold))
         ],
@@ -422,12 +429,15 @@ class NumWithDesc extends StatelessWidget {
 class TopBarWithCallback extends StatefulWidget {
   const TopBarWithCallback(
       {Key key,
+      @required this.expandedHeight,
       @required this.extraPicHeight,
       @required this.fitType,
       @required this.bgAnim,
       @required this.updateHeight})
       : super(key: key);
+
   final double extraPicHeight;
+  final double expandedHeight;
   final BoxFit fitType;
   final Animation<double> bgAnim;
   final Function(double) updateHeight;
@@ -442,6 +452,7 @@ class _TopBarWithCallbackState extends State<TopBarWithCallback>
   Widget build(BuildContext context) {
     return Container(
       child: UserSliverTopBar(
+          expandedHeight: widget.expandedHeight + 50,
           extraPicHeight: widget.extraPicHeight,
           fitType: widget.fitType,
           bgAnim: widget.bgAnim),
@@ -454,5 +465,20 @@ class _TopBarWithCallbackState extends State<TopBarWithCallback>
     double height =
         box.getMaxIntrinsicHeight(MediaQuery.of(context).size.width);
     widget.updateHeight(height);
+  }
+}
+
+class CutLine extends StatelessWidget {
+  const CutLine({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double rpx = MediaQuery.of(context).size.width / 750;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20 * rpx),
+      child: Divider(
+        color: Colors.grey[700],
+      ),
+    );
   }
 }
